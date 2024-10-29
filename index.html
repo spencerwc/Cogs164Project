@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My experiment</title>
+  <script src="https://unpkg.com/jspsych@8.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
+  <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body></body>
+<script>
+
+  /* initialize jsPsych */
+  var jsPsych = initJsPsych({
+    on_finish: function () {
+      jsPsych.data.displayData();
+    }
+  });
+
+  /* create timeline */
+  var timeline = [];
+
+  /* create stimulus list */
+  //first create a list of categories
+  var category_list = ["bar", "bathroom", "bridge", "coast", "gym", "desert", "kitchen", "field", "playground", "stream", "street", "woods"]
+  //shuffle
+  var category_list_shuffled = jsPsych.randomization.shuffle(category_list);
+  console.log(category_list_shuffled)
+
+  //now define the roles in the triplets based on the randomized position of the items in the array (A=0, B=1, ...)
+  //note that we are always selecting the first image here, but we could also randomly select from the set of images for each category here
+  // define key elements of the image
+  var img_extension = ".jpg"
+  var img_id = "1" // could make a random selection from a constrained list of images here
+  var img_path = "stimuli/"
+  var stimulus_list = {
+    A: { category: category_list_shuffled[0], image_name: img_path + category_list_shuffled[0] + "_" + img_id + img_extension },
+    B: { category: category_list_shuffled[1], image_name: img_path + category_list_shuffled[1] + "_" + img_id + img_extension },
+    C: { category: category_list_shuffled[2], image_name: img_path + category_list_shuffled[2] + "_" + img_id + img_extension },
+    D: { category: category_list_shuffled[3], image_name: img_path + category_list_shuffled[3] + "_" + img_id + img_extension },
+    E: { category: category_list_shuffled[4], image_name: img_path + category_list_shuffled[4] + "_" + img_id + img_extension },
+    F: { category: category_list_shuffled[5], image_name: img_path + category_list_shuffled[5] + "_" + img_id + img_extension },
+    G: { category: category_list_shuffled[6], image_name: img_path + category_list_shuffled[6] + "_" + img_id + img_extension },
+    H: { category: category_list_shuffled[7], image_name: img_path + category_list_shuffled[7] + "_" + img_id + img_extension },
+    I: { category: category_list_shuffled[8], image_name: img_path + category_list_shuffled[8] + "_" + img_id + img_extension },
+    J: { category: category_list_shuffled[9], image_name: img_path + category_list_shuffled[9] + "_" + img_id + img_extension },
+    K: { category: category_list_shuffled[10], image_name: img_path + category_list_shuffled[10] + "_" + img_id + img_extension },
+    L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + img_id + img_extension }
+  };
+
+  //create a "toy" trial list of 15 images
+  // How can we expand this stream of images into a more general, randomized trial list?
+  var trial_list = ["A", "B", "C", "D", "E", "F", "A", "B", "C", "J", "K", "L", "G", "H", "I"]
+
+  //create an array telling us when to repeat one of the images
+  // how can we generalize this for the full trial list
+  // can only be the first or third element in a triplet
+  // from the paper: "images were inserted into the stream such that sometimes either the first or third image in a triplet repeated immediately"
+  var repeat_ids = [5, 12]
+
+  //create a trial counter to keep track of how many images we've shown so far
+  // also create a running counter tracking the repeat images we've added
+  var trial_counter = 0
+  var repeat_counter = 0
+
+  //create a for loop to run through the trial list
+  for (i = 0; i < trial_list.length; i++) {
+
+    //store the current category letter 
+    var current_letter = trial_list[i];
+    //store the corresponding category and image name
+    var current_category = stimulus_list[current_letter]["category"];
+    var current_image_name = stimulus_list[current_letter]["image_name"];
+
+    // here's how we can construct a simple image trial
+    // TO DO: what else do we need to add to the trial procedure? What other information should we store? How can we turn this into a complete experiment timeline?
+    var trial = {
+      type: jsPsychImageKeyboardResponse,
+      stimulus: current_image_name,
+      //make the space bar a response option
+      choices: [" "],
+      //the stimulus is shown for 300 ms
+      stimulus_duration: 300,
+      data: {
+        category: current_category,
+        letter: current_letter,
+        correct_response: "non-repeat",
+        correct_response_key: null,
+        trial_counter: trial_counter
+      },
+      //post trial gap of 700ms (300+700ms = 1000ms)
+      // controlling this through the overall trial duration ensures that we can collect a response before the next image starts
+      trial_duration: 1000,
+      //response should not end trial so that we can keep the same consistent presentation timing
+      response_ends_trial: false
+    }
+    //push the trial to the timeline
+    timeline.push(trial);
+
+    // check if we should insert a repeat image
+    // if we do, make sure to update the repeat counter 
+    //so that we move on to the next repeated event when checking in future iterations
+    var current_repeat_id = repeat_ids[repeat_counter];
+    if (i == current_repeat_id) {
+      //if we've reached a repeat trial insert an extra image
+      var repeat_trial = {
+        type: jsPsychImageKeyboardResponse,
+        stimulus: current_image_name,
+        //make the space bar a response option
+        choices: [" "],
+        //the stimulus is shown for 300 ms
+        stimulus_duration: 300,
+        data: {
+          category: current_category,
+          letter: current_letter,
+          //now it IS a repeat!
+          correct_response: "repeat",
+          //space bar is the correct response
+          correct_response_key: " ",
+          trial_counter: trial_counter
+        },
+        //post trial gap of 700ms (300+700ms = 1000ms)
+        // doing it this way ensures that we can collect a response before the next image starts
+        trial_duration: 1000,
+        //response should not end trial so that we can keep the same consistent presentation timing
+        response_ends_trial: false
+      }
+      //push the trial to the timeline
+      timeline.push(repeat_trial);
+
+      // update the repeat counter
+      repeat_counter = repeat_counter + 1;
+    }
+    //update the trial_counter
+    trial_counter = trial_counter + 1;
+
+  }
+
+  /* start the experiment */
+  jsPsych.run(timeline);
+
+</script>
+
+</html>
