@@ -18,8 +18,49 @@
     }
   });
 
+
   /* create timeline */
   var timeline = [];
+
+  /* welcome */
+  var welcome = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "Welcome to the experiment. Press any key to begin.",
+ };
+
+  /* full screen */
+ var enter_fullscreen ={
+  type: jsPsychFullscreen,
+  fullscreen_mode:true
+ }
+ timeline.push(enter_fullscreen);
+
+ /* participant ID */
+ var participant_id_entry= {
+  type: jsPsychSurveyText,
+  questions: [{prompt:"Please enter your participant ID (e.g. p1):", name:"participant_id"}],
+  on_finish: function(data){
+    console.log(data.response)
+    jsPsych.data.addProperties({
+      participant: data.response.participant_id
+    });
+  }
+ };
+ timeline.push(participant_id_entry);
+
+ timeline.push(welcome);
+
+ /* instructions*/
+ var instructions = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: `
+  <p>For this trial, you will see a series of images.</p>
+  <p>Click on the animal that is named, as fast as you can.</p>
+  <p>Press any key to begin.</p>`
+ };
+
+ //add the instructions trial to the timeline
+ timeline.push(instructions);
 
   /* create stimulus list */
   //first create a list of categories
@@ -49,17 +90,19 @@
     L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + img_id + img_extension }
   };
 
-  //create a "toy" trial list of 15 images
+  //create a "toy" trial list of 12 images
   // How can we expand this stream of images into a more general, randomized trial list?
-  var trial_list = ["A", "B", "C", "D", "E", "F", "A", "B", "C", "J", "K", "L", "G", "H", "I"]
+  var toy_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
+  var randomized_list = jsPsych.randomization.shuffle(toy_list);
   var trips_list ={
-    t1: trial_list.slice(0,3),
-    t2: trial_list.slice(3,6),
-    t3: trial_list.slice(9,12),
-    t4: trial_list.slice(12,15)
+    t1: randomzied_list.slice(0,3),
+    t2: randomized_list.slice(3,6),
+    t3: randomzied_list.slice(6,9),
+    t4: randomized_list.slice(9,12)
   };
   var randomize_trips = jsPsych.randomization.shuffle(trips_list);
   var trips_shuffled = randomize_trips.flat();
+  
 
   //create an array telling us when to repeat one of the images
   // how can we generalize this for the full trial list
@@ -73,7 +116,7 @@
   var repeat_counter = 0
 
   //create a for loop to run through the trial list
-  for (i = 0; i < trial_list.length; i++) {
+  for (i = 0; i < trips_shuffled.length; i++) {
 
     //store the current category letter 
     var current_letter = trips_shuffled[i];
