@@ -58,7 +58,7 @@
    type: jsPsychHtmlKeyboardResponse,
    stimulus: `
   <p>For this trial, you will see a series of images.</p>
-  <p>Click on the animal that is named, as fast as you can.</p>
+  <p>Press the spacebar whenever you see a repeat of an image.</p>
   <p>Press any key to begin.</p>`
  };
 
@@ -106,7 +106,8 @@
   var trips_list = [t1, t2, t3, t4]
 
   var randomize_trips = jsPsych.randomization.shuffle(trips_list);
-  var trips_shuffled = randomize_trips.flat();
+  var trips_shuffled = randomize_trips.flat(Infinity);
+  console.log(trips_shuffled)
   
 
   //create an array telling us when to repeat one of the images
