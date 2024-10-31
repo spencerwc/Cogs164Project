@@ -114,7 +114,7 @@
   // how can we generalize this for the full trial list
   // can only be the first or third element in a triplet
   // from the paper: "images were inserted into the stream such that sometimes either the first or third image in a triplet repeated immediately"
-  var repeat_ids = [5, 12]
+  var repeat_ids = jsPsych.randomization.sampleWithoutReplacement([0, 2, 3, 5, 6, 8, 9, 11], 4);
 
   //create a trial counter to keep track of how many images we've shown so far
   // also create a running counter tracking the repeat images we've added
