@@ -97,12 +97,14 @@
   // How can we expand this stream of images into a more general, randomized trial list?
   var toy_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
   var randomized_list = jsPsych.randomization.shuffle(toy_list);
-  var trips_list ={
-    t1: randomized_list.slice(0,3),
-    t2: randomized_list.slice(3,6),
-    t3: randomized_list.slice(6,9),
-    t4: randomized_list.slice(9,12)
-  };
+
+  var t1 =[randomized_list.slice(0,3)];
+  var t2 =[randomized_list.slice(3,6)];
+  var t3 =[randomized_list.slice(6,9)];
+  var t4 =[randomized_list.slice(9,12)];
+
+  var trips_list = [t1, t2, t3, t4]
+
   var randomize_trips = jsPsych.randomization.shuffle(trips_list);
   var trips_shuffled = randomize_trips.flat();
   
