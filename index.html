@@ -49,10 +49,10 @@
     });
   }
  };
- timeline.push(participant_id_entry);
 
  timeline.push(welcome);
 
+ timeline.push(participant_id_entry);
  /* instructions*/
  var instructions = {
    type: jsPsychHtmlKeyboardResponse,
@@ -195,6 +195,36 @@
 
   }
 
+  /* instructions*/
+ var instructions_2 = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: `
+  <p>For this next trial, you will see two sets of images.</p>
+  <p>Press 1 or 2 if either the first or second sequence is more familiar.</p>
+  <p>Press any key to begin.</p>`
+ };
+
+ timeline.push(instructions_2);
+ 
+/*attempt to make second trial */
+/*need to repeat this trial for each triplet 4 times */
+var trips_repeat4 = jsPsych.randomization.repeat(trips_list, 4);
+console.log(trips_repeat4); //look like [t1,t2,t4,t3, t2, t1, ,t4, t3... etc]
+
+
+
+for(i=0; i< trips_repeat4.length; i++){
+  //store the current triplet; would want to compare later (is this triplet the same as the original t1,t2, etc; current_trip == t1 or t2...)
+  var current_trip = trips_repeat4[i];
+
+  var trial = {
+        type: jsPsychImageKeyboardResponse,
+        stimulus: current_image_name,
+        prompt: "<p>Press 1 or 2 if either the first or second sequence is more familiar.</p>",
+        choices: [1,2],
+        post_trial_gap: 1000,
+  }
+};
   /* start the experiment */
   jsPsych.run(timeline);
 
