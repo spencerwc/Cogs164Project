@@ -105,9 +105,29 @@
 
   var trips_list = [t1, t2, t3, t4]
 
+  
+
+
   var randomize_trips = jsPsych.randomization.shuffle(trips_list);
-  var trips_shuffled = randomize_trips.flat(Infinity);
+  var trips_shuffled = randomize_trips.flat(3);
   console.log(trips_shuffled)
+
+  var trips_repetitions = jsPsych.randomization.repeat(trips_list, 20);
+  console.log(trips_repetitions);
+
+  var new_trips = [];
+  for(i = 0; i < trips_repetitions.length - 1; i++){
+    var currentIndex = trips_repetitions[i];
+    var nextIndex = trips_repetitions[i + 1];
+    if(currentIndex != nextIndex){
+      new_trips.push(currentIndex);
+    }
+  }
+  //here is where I'm having a problem; since we want the trial to last 5 minutes, we repeat it.
+  //I showed the for loop; it would add the current triplet to a new list so it wouldn't have repeats in a row (ABCABC)
+  //when I look at in webdeveloper, it shows an array of objects and not a single, flattened array.
+  var new_trips = new_trips.flat(Infinity)
+  console.log(new_trips);
   
 
   //create an array telling us when to repeat one of the images
@@ -207,15 +227,26 @@
  timeline.push(instructions_2);
  
 /*attempt to make second trial */
-/*need to repeat this trial for each triplet 4 times */
-var trips_repeat4 = jsPsych.randomization.repeat(trips_list, 4);
-console.log(trips_repeat4); //look like [t1,t2,t4,t3, t2, t1, ,t4, t3... etc]
+var foil_randomized = jsPsych.randomization.shuffle(trips_shuffled);
+var foil1 = foil_randomized.slice(0,3);
+var foil2 = foil_randomized.slice(3,6);
+var foil3 = foil_randomized.slice(6,9);
+var foil4 = foil_randomized.slice(9,12);
 
+var foil_list = [foil1, foil2, foil3, foil4];
 
+var experiment_2_trial = [
+  {
+    images: [t1, ],
+    correct_image: [t1]
+  }
+]
 
-for(i=0; i< trips_repeat4.length; i++){
-  //store the current triplet; would want to compare later (is this triplet the same as the original t1,t2, etc; current_trip == t1 or t2...)
-  var current_trip = trips_repeat4[i];
+for(i=0; i< 1; i++){
+  var current_letter = trips_shuffled[i];
+    //store the corresponding category and image name
+  var current_category = stimulus_list[current_letter]["category"];
+  var current_image_name = stimulus_list[current_letter]["image_name"];
 
   var trial_2 = {
         type: jsPsychImageKeyboardResponse,
