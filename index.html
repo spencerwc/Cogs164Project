@@ -94,6 +94,7 @@
     L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + img_id + img_extension }
   };
 
+  //preloading pulled from Peter's branch
   // Extract the image paths for preloading
   var image_paths = Object.values(stimulus_list).map(item => item.image_name);
   
@@ -127,7 +128,7 @@
   //The problem with that is I previously used .flat() to make an array of arrays --> array
   //But it doesn't work with an array of objects, so I just looped through it.
   //We figured out 50 repetitions of the 4 triplets --> last around 8~ minutes, can shorten it (just made it to test, as 20 repetitions was only 2 minutes.)
-  for(i=0; i < 50; i++){
+  for(i=0; i < 1; i++){
     trips_repetitions.push(trips_list);
   }
   console.log(trips_repetitions);
@@ -261,13 +262,30 @@ var foil_list = [foil1, foil2, foil3, foil4];
 
 var experiment_2_trial = [
   {
-    images: [],
+    images: [t1, foil1],
     correct_image: [t1]
+  },
+  {
+    images: [t1, foil2],
+    correct_image: [t2]
+  },
+  {
+    images: [t3, foil3],
+    correct_image: [t3]
+  },
+  {
+    images: [t4, foil4],
+    correct_image: [t4]
   }
-]
+];
+var shuffled_experiment2 = jsPsych.randomization.repeat(experiment_2_trial, 1)
 
-for(i=0; i< 1; i++){
-  var current_letter = trips_shuffled[i];
+//right now my problem is getting the right image path for the original triplets [t1, t2, t3, t4]
+//I used the original trial code "var current_category..." but I know the pathing is wrong due to the presence of three images (ABC)
+//instead of "A" then "B" to pull individual images.
+
+/* for(i=0; i< shuffled_experiment2.length; i++){
+  var current_letter = shuffled_experiment2[i];
     //store the corresponding category and image name
   var current_category = stimulus_list[current_letter]["category"];
   var current_image_name = stimulus_list[current_letter]["image_name"];
@@ -279,7 +297,8 @@ for(i=0; i< 1; i++){
         choices: [1,2],
         post_trial_gap: 1000,
   }
-};
+  timeline.push(trial_2); 
+}; /*
   /* start the experiment */
   jsPsych.run(timeline);
 
