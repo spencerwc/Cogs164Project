@@ -16,11 +16,17 @@
 <script>
 
   /* initialize jsPsych */
-  var jsPsych = initJsPsych({
-    on_finish: function () {
-      jsPsych.data.displayData();
-    }
-  });
+  var jsPsych = initJsPsych(
+   {
+     on_finish: function () {
+       jsPsych.data.
+       get()
+        .ignore(['plugin_version', 'trial_type'])
+        .localSave('csv', 'Trial.csv');;;
+     }
+   }
+ );
+    
 
 
   /* create timeline */
@@ -240,6 +246,93 @@
     trial_counter = trial_counter + 1;
 
   }
+
+
+// Define study triplets and foil triplets
+var study_triplets = [
+  ['A', 'B', 'C'],
+  ['D', 'E', 'F'],
+  ['G', 'H', 'I'],
+  ['J', 'K', 'L']
+];
+
+var foil_triplets = [
+  ['A', 'E', 'I'],
+  ['D', 'H', 'L'],
+  ['G', 'K', 'C'],
+  ['J', 'B', 'F']
+];
+
+// Helper function to create HTML for a triplet of images
+function createImageTripletHTML(triplet) {
+  return `
+    <div style="display: flex; justify-content: center; gap: 20px;">
+      <img src="${stimulus_list[triplet[0]].image_name}" width="200" height="200">
+      <img src="${stimulus_list[triplet[1]].image_name}" width="200" height="200">
+      <img src="${stimulus_list[triplet[2]].image_name}" width="200" height="200">
+    </div>
+  `;
+}
+
+// Familiarity test trials
+var familiarity_test_trials = [];
+
+study_triplets.forEach((study_triplet, index) => {
+  for (let i = 0; i < 2; i++) {  // Each triplet is tested twice with each foil
+    var foil_triplet = foil_triplets[index];
+
+    // Randomize order: 0 = test triplet first, 1 = foil triplet first
+    var order = Math.random() < 0.5 ? 0 : 1;
+
+    // Define the two sequences with 1000ms pause in between
+    var test_sequence_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: createImageTripletHTML(order === 0 ? study_triplet : foil_triplet),
+      choices: "NO_KEYS",
+      trial_duration: 1000,  // Display each triplet for 1000 ms
+    };
+
+    var foil_sequence_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: createImageTripletHTML(order === 1 ? study_triplet : foil_triplet),
+      choices: "NO_KEYS",
+      trial_duration: 1000,  // Display each triplet for 1000 ms
+    };
+
+    // Add a 1000ms pause between sequences
+    var pause_between_sequences = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "<p></p>",
+      choices: "NO_KEYS",
+      trial_duration: 1000
+    };
+
+    // Collect response after both sequences have been shown
+    var response_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "<p>Press '1' if the first sequence was familiar, '2' if the second was.</p>",
+      choices: ['1', '2'],
+      data: {
+        test_triplet: study_triplet,
+        foil_triplet: foil_triplet,
+        correct_response: order === 0 ? '1' : '2'  // Correct response based on sequence order
+      },
+      on_finish: function(data) {
+        data.correct = data.response === data.correct_response;
+      }
+    };
+
+    // Add the sequence trials and response trial to the timeline
+    familiarity_test_trials.push(test_sequence_trial);
+    familiarity_test_trials.push(pause_between_sequences);
+    familiarity_test_trials.push(foil_sequence_trial);
+    familiarity_test_trials.push(response_trial);
+  }
+});
+
+// Add familiarity test trials to the timeline
+timeline.push(...familiarity_test_trials);
+
   /* start the experiment */
   jsPsych.run(timeline);
 
