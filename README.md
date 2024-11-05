@@ -2,4 +2,4 @@
 
 To run the experiment, click on the following link:
 
-https://cogs119.github.io/group_fa24_statistical_learning/
+https://github.com/COGS119/group_fa24_statistical_learning/tree/calixto_branch

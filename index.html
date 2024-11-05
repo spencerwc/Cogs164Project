@@ -2,9 +2,13 @@
 <html>
 
 <head>
-  <title>My experiment</title>
+  <title>SL Experiment</title>
   <script src="https://unpkg.com/jspsych@8.0.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
   <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -18,8 +22,49 @@
     }
   });
 
+
   /* create timeline */
   var timeline = [];
+
+  /* welcome */
+  var welcome = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "Welcome to the experiment. Press any key to begin.",
+ };
+
+  /* full screen */
+ var enter_fullscreen ={
+  type: jsPsychFullscreen,
+  fullscreen_mode:true
+ }
+ timeline.push(enter_fullscreen);
+
+ /* participant ID */
+ var participant_id_entry= {
+  type: jsPsychSurveyText,
+  questions: [{prompt:"Please enter your participant ID (e.g. p1):", name:"participant_id"}],
+  on_finish: function(data){
+    console.log(data.response)
+    jsPsych.data.addProperties({
+      participant: data.response.participant_id
+    });
+  }
+ };
+
+ timeline.push(welcome);
+
+ timeline.push(participant_id_entry);
+ /* instructions*/
+ var instructions = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: `
+  <p>For this trial, you will see a series of images.</p>
+  <p>Press the spacebar whenever you see a repeat of an image.</p>
+  <p>Press any key to begin.</p>`
+ };
+
+ //add the instructions trial to the timeline
+ timeline.push(instructions);
 
   /* create stimulus list */
   //first create a list of categories
@@ -49,15 +94,73 @@
     L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + img_id + img_extension }
   };
 
-  //create a "toy" trial list of 15 images
+  //preloading pulled from Peter's branch
+  // Extract the image paths for preloading
+  var image_paths = Object.values(stimulus_list).map(item => item.image_name);
+  
+  // Set up the preload with the specific image paths
+  var preload = {
+  type: jsPsychPreload,
+  images: image_paths // Specify the images array for preloading
+  };
+
+  //create a "toy" trial list of 12 images
   // How can we expand this stream of images into a more general, randomized trial list?
-  var trial_list = ["A", "B", "C", "D", "E", "F", "A", "B", "C", "J", "K", "L", "G", "H", "I"]
+  var toy_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
+  var randomized_list = jsPsych.randomization.shuffle(toy_list);
+
+  var t1 =[randomized_list.slice(0,3)];
+  var t2 =[randomized_list.slice(3,6)];
+  var t3 =[randomized_list.slice(6,9)];
+  var t4 =[randomized_list.slice(9,12)];
+
+  var trips_list = [t1, t2, t3, t4]
+  console.log(trips_list);
+  
+
+
+  var randomize_trips = jsPsych.randomization.shuffle(trips_list);
+  var trips_shuffled = randomize_trips.flat(3);
+  console.log(trips_shuffled)
+
+  var trips_repetitions =[];
+  //The problem with jsPsych.randomization.repeat(array, repetitions) is that it would make an array of objects.
+  //The problem with that is I previously used .flat() to make an array of arrays --> array
+  //But it doesn't work with an array of objects, so I just looped through it.
+  //We figured out 50 repetitions of the 4 triplets --> last around 8~ minutes, can shorten it (just made it to test, as 20 repetitions was only 2 minutes.)
+  //I made it 1 for now so it's not long.
+  for(i=0; i < 1; i++){
+    trips_repetitions.push(trips_list);
+  }
+  console.log(trips_repetitions);
+  //I can now flatten it, but only to 1 degree so it becomes [ [triplet], [triplet], [triplet]...] from [[[1], [2],...], [[1],[2],...], ...]
+  var trips_repetitions= trips_repetitions.flat(1);
+  var trips_repetitions = jsPsych.randomization.shuffle(trips_repetitions);
+  console.log(trips_repetitions)
+
+  //this checks for repeats; it'll make sure (ABCABC...) will not happen --> (ABCGHIABCDEF...)
+  var new_trips = [];
+  for(i = 0; i < trips_repetitions.length - 1; i++){
+    var currentIndex = trips_repetitions[i];
+    var nextIndex = trips_repetitions[i + 1];
+    if(currentIndex != nextIndex){
+      new_trips.push(currentIndex);
+    }
+  }
+  var new_trips = new_trips.flat(Infinity)
+  console.log(new_trips);
+  
 
   //create an array telling us when to repeat one of the images
   // how can we generalize this for the full trial list
   // can only be the first or third element in a triplet
   // from the paper: "images were inserted into the stream such that sometimes either the first or third image in a triplet repeated immediately"
-  var repeat_ids = [5, 12]
+
+  //the only problem with this method is that the repeated image_id is from an entirely differen triplet.
+  //I do not know a current solution.**********************
+  //I merely wanted to implement duplicated images from triplets.
+  var repeat_ids = jsPsych.randomization.sampleWithReplacement([0, 2, 3, 5, 6, 8, 9, 11], 200);
+  console.log(repeat_ids);
 
   //create a trial counter to keep track of how many images we've shown so far
   // also create a running counter tracking the repeat images we've added
@@ -65,10 +168,10 @@
   var repeat_counter = 0
 
   //create a for loop to run through the trial list
-  for (i = 0; i < trial_list.length; i++) {
+  for (i = 0; i < new_trips.length; i++) {
 
     //store the current category letter 
-    var current_letter = trial_list[i];
+    var current_letter = new_trips[i];
     //store the corresponding category and image name
     var current_category = stimulus_list[current_letter]["category"];
     var current_image_name = stimulus_list[current_letter]["image_name"];
@@ -78,6 +181,7 @@
     var trial = {
       type: jsPsychImageKeyboardResponse,
       stimulus: current_image_name,
+      prompt: "<p>Press the spacebar whenever there is a repeat image.</p>",
       //make the space bar a response option
       choices: [" "],
       //the stimulus is shown for 300 ms
@@ -136,7 +240,6 @@
     trial_counter = trial_counter + 1;
 
   }
-
   /* start the experiment */
   jsPsych.run(timeline);
 
