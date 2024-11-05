@@ -240,66 +240,6 @@
     trial_counter = trial_counter + 1;
 
   }
-
-  /* instructions*/
- var instructions_2 = {
-   type: jsPsychHtmlKeyboardResponse,
-   stimulus: `
-  <p>For this next trial, you will see two sets of images.</p>
-  <p>Press 1 or 2 if either the first or second sequence is more familiar.</p>
-  <p>Press any key to begin.</p>`
- };
-
- timeline.push(instructions_2);
- 
-/*attempt to make second trial */
-var foil_randomized = jsPsych.randomization.shuffle(trips_shuffled);
-var foil1 = foil_randomized.slice(0,3);
-var foil2 = foil_randomized.slice(3,6);
-var foil3 = foil_randomized.slice(6,9);
-var foil4 = foil_randomized.slice(9,12);
-
-var foil_list = [foil1, foil2, foil3, foil4];
-
-var experiment_2_trial = [
-  {
-    images: [t1, foil1],
-    correct_image: [t1]
-  },
-  {
-    images: [t1, foil2],
-    correct_image: [t2]
-  },
-  {
-    images: [t3, foil3],
-    correct_image: [t3]
-  },
-  {
-    images: [t4, foil4],
-    correct_image: [t4]
-  }
-];
-var shuffled_experiment2 = jsPsych.randomization.repeat(experiment_2_trial, 1)
-
-//right now my problem is getting the right image path for the original triplets [t1, t2, t3, t4]
-//I used the original trial code "var current_category..." but I know the pathing is wrong due to the presence of three images (ABC)
-//instead of "A" then "B" to pull individual images.
-
-/* for(i=0; i< shuffled_experiment2.length; i++){
-  var current_letter = shuffled_experiment2[i];
-    //store the corresponding category and image name
-  var current_category = stimulus_list[current_letter]["category"];
-  var current_image_name = stimulus_list[current_letter]["image_name"];
-
-  var trial_2 = {
-        type: jsPsychImageKeyboardResponse,
-        stimulus: current_image_name,
-        prompt: "<p>Press 1 or 2 if either the first or second sequence is more familiar.</p>",
-        choices: [1,2],
-        post_trial_gap: 1000,
-  }
-  timeline.push(trial_2); 
-}; /*
   /* start the experiment */
   jsPsych.run(timeline);
 
