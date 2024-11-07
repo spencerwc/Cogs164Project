@@ -135,7 +135,7 @@
   //But it doesn't work with an array of objects, so I just looped through it.
   //We figured out 50 repetitions of the 4 triplets --> last around 8~ minutes, can shorten it (just made it to test, as 20 repetitions was only 2 minutes.)
   //You can make it 0-1 so it's not long for trial-testing the entire experiment.
-  for(i=0; i < 50; i++){
+  for(i=0; i < 1; i++){
     trips_repetitions.push(trips_list);
   }
   console.log(trips_repetitions);
@@ -247,20 +247,24 @@
 
   }
 
-
+var flat_trips_list = trips_list.flat(Infinity)
+var randomized_foils = jsPsych.randomization.shuffle(trips_list);
+var randomized_foils = randomized_foils.flat(Infinity)
+//t1 = ['A', 'B', C']
+//t1[0]
 // Define study triplets and foil triplets
 var study_triplets = [
-  ['A', 'B', 'C'],
-  ['D', 'E', 'F'],
-  ['G', 'H', 'I'],
-  ['J', 'K', 'L']
+  [flat_trips_list[0], flat_trips_list[1], flat_trips_list[2]],
+  [flat_trips_list[3], flat_trips_list[4], flat_trips_list[5]],
+  [flat_trips_list[6], flat_trips_list[7], flat_trips_list[8]],
+  [flat_trips_list[9], flat_trips_list[10], flat_trips_list[9]]
 ];
 
 var foil_triplets = [
-  ['A', 'E', 'I'],
-  ['D', 'H', 'L'],
-  ['G', 'K', 'C'],
-  ['J', 'B', 'F']
+  [randomized_foils[0], randomized_foils[1], randomized_foils[2]],
+  [randomized_foils[3], randomized_foils[4], randomized_foils[5]],
+  [randomized_foils[6], randomized_foils[7], randomized_foils[8]],
+  [randomized_foils[9], randomized_foils[10], randomized_foils[11]]
 ];
 
 // Helper function to create HTML for a triplet of images
