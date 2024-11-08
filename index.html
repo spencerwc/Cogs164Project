@@ -244,11 +244,13 @@ var foil_triplets = [
 
   }
 
+
   // Helper function to create a triplet presentation sequence
   function createImageTripletTimeline(triplet) {
     return triplet.map(letter => ({
       type: jsPsychImageKeyboardResponse,
       stimulus: stimulus_list[letter].image_name,
+
       choices: "NO_KEYS",
       stimulus_duration: 300,
       trial_duration: 1000
