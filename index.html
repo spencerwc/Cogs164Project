@@ -216,7 +216,7 @@
       response_ends_trial: false
     }
     //push the trial to the timeline
-    //timeline.push(trial);
+    timeline.push(trial);
 
     // check if we should insert a repeat image
     // if we do, make sure to update the repeat counter 
@@ -247,7 +247,7 @@
         response_ends_trial: false
       }
       //push the trial to the timeline
-      //timeline.push(repeat_trial);
+      timeline.push(repeat_trial);
 
       // update the repeat counter
       repeat_counter = repeat_counter + 1;
@@ -304,7 +304,7 @@
     }
   });
 
-  //timeline.push(...familiarity_test_trials);
+  timeline.push(...familiarity_test_trials);
 
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //this portion of the code ensures that the data gets sent to be stored on OSF
