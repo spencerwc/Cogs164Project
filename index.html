@@ -321,16 +321,6 @@ var instructions_2 = {
 
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //this portion of the code ensures that the data gets sent to be stored on OSF
-  const save_data = {
-    type: jsPsychPipe,
-    action: "save",
-    experiment_id: "PAfzfuHy0doi",
-    filename: filename,
-    data_string: () => jsPsych.data.get().csv()
-  };
-  timeline.push(save_data);
-  //PLEASE KEEP FOR ALL FUTURE ITERATIONS
-
   var participant_survey = {
     type: jsPsychSurveyText,
     questions: [
@@ -349,6 +339,16 @@ var debrief = {
     <p>Press any key to finish.</p>`,
 };
 timeline.push(debrief);
+  const save_data = {
+    type: jsPsychPipe,
+    action: "save",
+    experiment_id: "PAfzfuHy0doi",
+    filename: filename,
+    data_string: () => jsPsych.data.get().csv()
+  };
+  timeline.push(save_data);
+  //PLEASE KEEP FOR ALL FUTURE ITERATIONS
+
 
 
   /* start the experiment */
