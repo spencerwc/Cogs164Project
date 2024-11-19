@@ -273,7 +273,17 @@ timeline.push(preload)
       trial_duration: 1000
     }));
   }
+/* instructions for test 2*/
+var instructions_2 = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+  <p>For this trial, you will see a sequneces of images.</p>
+  <p>Press 1 or 2 if the first or second sequence felt familiar..</p>
+  <p>Press any key to begin.</p>`
+  };
 
+  //add the instructions trial to the timeline
+  timeline.push(instructions);
   // Familiarity test logic
   var familiarity_test_trials = [];
   study_triplets.forEach((study_triplet, index) => {
