@@ -96,21 +96,20 @@
   //note that we are always selecting the first image here, but we could also randomly select from the set of images for each category here
   // define key elements of the image
   var img_extension = ".jpg"
-  var img_id = "1" // could make a random selection from a constrained list of images here
   var img_path = "stimuli/"
   var stimulus_list = {
-    A: { category: category_list_shuffled[0], image_name: img_path + category_list_shuffled[0] + "_" + img_id + img_extension },
-    B: { category: category_list_shuffled[1], image_name: img_path + category_list_shuffled[1] + "_" + img_id + img_extension },
-    C: { category: category_list_shuffled[2], image_name: img_path + category_list_shuffled[2] + "_" + img_id + img_extension },
-    D: { category: category_list_shuffled[3], image_name: img_path + category_list_shuffled[3] + "_" + img_id + img_extension },
-    E: { category: category_list_shuffled[4], image_name: img_path + category_list_shuffled[4] + "_" + img_id + img_extension },
-    F: { category: category_list_shuffled[5], image_name: img_path + category_list_shuffled[5] + "_" + img_id + img_extension },
-    G: { category: category_list_shuffled[6], image_name: img_path + category_list_shuffled[6] + "_" + img_id + img_extension },
-    H: { category: category_list_shuffled[7], image_name: img_path + category_list_shuffled[7] + "_" + img_id + img_extension },
-    I: { category: category_list_shuffled[8], image_name: img_path + category_list_shuffled[8] + "_" + img_id + img_extension },
-    J: { category: category_list_shuffled[9], image_name: img_path + category_list_shuffled[9] + "_" + img_id + img_extension },
-    K: { category: category_list_shuffled[10], image_name: img_path + category_list_shuffled[10] + "_" + img_id + img_extension },
-    L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + img_id + img_extension }
+    A: { category: category_list_shuffled[0], image_name: img_path + category_list_shuffled[0] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    B: { category: category_list_shuffled[1], image_name: img_path + category_list_shuffled[1] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    C: { category: category_list_shuffled[2], image_name: img_path + category_list_shuffled[2] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    D: { category: category_list_shuffled[3], image_name: img_path + category_list_shuffled[3] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    E: { category: category_list_shuffled[4], image_name: img_path + category_list_shuffled[4] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    F: { category: category_list_shuffled[5], image_name: img_path + category_list_shuffled[5] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    G: { category: category_list_shuffled[6], image_name: img_path + category_list_shuffled[6] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    H: { category: category_list_shuffled[7], image_name: img_path + category_list_shuffled[7] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    I: { category: category_list_shuffled[8], image_name: img_path + category_list_shuffled[8] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    J: { category: category_list_shuffled[9], image_name: img_path + category_list_shuffled[9] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    K: { category: category_list_shuffled[10], image_name: img_path + category_list_shuffled[10] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension }
   };
 
   //preloading pulled from Peter's branch
@@ -151,8 +150,8 @@ timeline.push(preload)
   console.log(trips_repetitions);
   //I can now flatten it, but only to 1 degree so it becomes [ [triplet], [triplet], [triplet]...] from [[[1], [2],...], [[1],[2],...], ...]
   var trips_repetitions = trips_repetitions.flat(1);
-  console.log(trips_repetitions)
   var trips_repetitions = jsPsych.randomization.shuffle(trips_repetitions);
+  console.log(trips_repetitions)
 
   //this checks for repeats; it'll make sure (ABCABC...) will not happen --> (ABCGHIABCDEF...)
   var new_trips = [];
@@ -331,6 +330,25 @@ var instructions_2 = {
   };
   timeline.push(save_data);
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
+
+  var participant_survey = {
+    type: jsPsychSurveyText,
+    questions: [
+    { prompt: "What do you think this experiment was about?" },
+    { prompt: "Did you encounter any technical issues?" },
+    { prompt: "Was it hard to recall the sequences" }
+  ]
+  }
+  timeline.push(participant_survey);
+
+var debrief = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: `
+    <p>Thank you for participating!</p>
+    <p>This experiment was designed to study how people recognize patterns in images.</p>
+    <p>Press any key to finish.</p>`,
+};
+timeline.push(debrief);
 
 
   /* start the experiment */
