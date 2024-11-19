@@ -178,7 +178,19 @@ timeline.push(preload)
   //the only problem with this method is that the repeated image_id is from an entirely differen triplet.
   //I do not know a current solution.**********************
   //I merely wanted to implement duplicated images from triplets.
-  var repeat_ids = jsPsych.randomization.sampleWithReplacement([0, 2, 3, 5, 6, 8, 9, 11], 200);
+  var list_of_letter_index =[]
+  for(i = 0; i < new_trips.length; i++){
+    position_of_letter = new_trips[i]
+    if(position_of_letter === "B" || "E" || "H" || "K"){
+      console.log(position_of_letter)
+    }
+    else{
+      list_of_letters_index.push(position_of_letter)
+    }
+  }
+  console.log(list_of_letter_index)
+
+  var repeat_ids = [0, 2]
   console.log(repeat_ids);
 
   //create a trial counter to keep track of how many images we've shown so far
@@ -263,42 +275,48 @@ timeline.push(preload)
 
 
   // Helper function to create a triplet presentation sequence
-  function createImageTripletTimeline(triplet) {
-    return triplet.map(letter => ({
-      type: jsPsychImageKeyboardResponse,
-      stimulus: stimulus_list[letter].image_name,
-
-      choices: "NO_KEYS",
-      stimulus_duration: 300,
-      trial_duration: 1000
-    }));
-  }
-/* instructions for test 2*/
-var instructions_2 = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `
-  <p>For this trial, you will see a sequneces of images.</p>
-  <p>Press 1 or 2 if the first or second sequence felt familiar..</p>
-  <p>Press any key to begin.</p>`
-  };
-
-  //add the instructions trial to the timeline
-  timeline.push(instructions);
-  // Familiarity test logic
-  var familiarity_test_trials = [];
-  study_triplets.forEach((study_triplet, index) => {
-    for (let i = 0; i < 2; i++) {
-      var foil_triplet = foil_triplets[index];
-      var order = Math.random() < 0.5 ? 0 : 1;
-      var firstSequence = createImageTripletTimeline(order === 0 ? study_triplet : foil_triplet);
-      var secondSequence = createImageTripletTimeline(order === 1 ? study_triplet : foil_triplet);
-
-      var pause_between_sequences = {
+  function createImageTripletTimeline(triplet, sequence_label) {
+    return [
+      {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: "<p></p>",
+        stimulus: `<p>${sequence_label}</p>`,
         choices: "NO_KEYS",
         trial_duration: 1000
-      };
+      },
+      ...triplet.map(letter => ({
+        type: jsPsychImageKeyboardResponse,
+        stimulus: stimulus_list[letter].image_name,
+        choices: "NO_KEYS",
+        stimulus_duration: 300,
+        trial_duration: 1000
+      }))
+    ];
+  }
+  /* instructions for test 2*/
+  var instructions_2 = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+    <p>For this trial, you will see a sequneces of images.</p>
+    <p>Press 1 or 2 if the first or second sequence felt familiar..</p>
+    <p>Press any key to begin.</p>`
+    };
+  
+    //add the instructions trial to the timeline
+    timeline.push(instructions);
+    // Familiarity test logic
+    var familiarity_test_trials = [];
+    study_triplets.forEach((study_triplet, index) => {
+      for (let i = 0; i < 2; i++) {
+        var foil_triplet = foil_triplets[index];
+        var order = Math.random() < 0.5 ? 0 : 1;
+        var firstSequence = createImageTripletTimeline(order === 0 ? study_triplet : foil_triplet, "Sequence 1");
+      var secondSequence = createImageTripletTimeline(order === 1 ? study_triplet : foil_triplet, "Sequence 2");
+        var pause_between_sequences = {
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: "<p></p>",
+          choices: "NO_KEYS",
+          trial_duration: 1000
+        };
 
       var response_trial = {
         type: jsPsychHtmlKeyboardResponse,
