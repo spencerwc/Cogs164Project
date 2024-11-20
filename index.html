@@ -175,22 +175,27 @@ timeline.push(preload)
   // can only be the first or third element in a triplet
   // from the paper: "images were inserted into the stream such that sometimes either the first or third image in a triplet repeated immediately"
 
-  //the only problem with this method is that the repeated image_id is from an entirely differen triplet.
-  //I do not know a current solution.**********************
-  //I merely wanted to implement duplicated images from triplets.
+  //from the new_trips which consists of all the shuffled, fixed for non-repeats of triplets 
+  //We made a for loop to go through each "second" index of a triplet, knowing from the study_triplets what letters they are
+  //Remove them, keep the index of the first and third element of every triplet.
   var list_of_letter_index =[]
   for(i = 0; i < new_trips.length; i++){
     position_of_letter = new_trips[i]
-    if(position_of_letter === "B" || "E" || "H" || "K"){
-      console.log(position_of_letter)
+    if(position_of_letter == "B" || position_of_letter == "E" || position_of_letter == "H" || position_of_letter == "K"){
+      continue
     }
     else{
-      list_of_letters_index.push(position_of_letter)
+      list_of_letter_index.push(i)
     }
   }
   console.log(list_of_letter_index)
 
-  var repeat_ids = [0, 2]
+  //the number 54 is based on the original experiment.
+  //they had 1,000 images, with 100 repeat images --> 10%
+  //we should have 540 images, so 54 images inserted as repeats.
+  //repeat_ids now has a sequential order that will add the repeat image immediately after.
+  //i.e. [0,2...200] 
+  var repeat_ids = jsPsych.randomization.sampleWithoutReplacement(list_of_letter_index, 54).sort;
   console.log(repeat_ids);
 
   //create a trial counter to keep track of how many images we've shown so far
