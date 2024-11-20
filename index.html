@@ -195,7 +195,7 @@ timeline.push(preload)
   //we should have 540 images, so 54 images inserted as repeats.
   //repeat_ids now has a sequential order that will add the repeat image immediately after.
   //i.e. [0,2...200] 
-  var repeat_ids = jsPsych.randomization.sampleWithoutReplacement(list_of_letter_index, 54).sort;
+  var repeat_ids = jsPsych.randomization.sampleWithoutReplacement(list_of_letter_index, 54).sort();
   console.log(repeat_ids);
 
   //create a trial counter to keep track of how many images we've shown so far
