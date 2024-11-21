@@ -314,8 +314,8 @@ timeline.push(preload)
       for (let i = 0; i < 2; i++) {
         var foil_triplet = foil_triplets[index];
         var order = Math.random() < 0.5 ? 0 : 1;
-        var firstSequence = createImageTripletTimeline(order === 0 ? study_triplet : foil_triplet, "Sequence 1");
-      var secondSequence = createImageTripletTimeline(order === 1 ? study_triplet : foil_triplet, "Sequence 2");
+        var firstSequence = createImageTripletTimeline(order === 0 ? foil_triplet : study_triplet, "Sequence 1");
+      var secondSequence = createImageTripletTimeline(order === 1 ? foil_triplet : study_triplet, "Sequence 2");
         var pause_between_sequences = {
           type: jsPsychHtmlKeyboardResponse,
           stimulus: "<p></p>",
