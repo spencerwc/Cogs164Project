@@ -18,15 +18,7 @@
 <script>
 
   /* initialize jsPsych */
-  var jsPsych = initJsPsych(
-    {
-      on_finish: function () {
-        jsPsych.data.
-          get()
-          .ignore(['plugin_version', 'trial_type'])
-      }
-    }
-  );
+  var jsPsych = initJsPsych();
 
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //create a unique filename by combining a random string and a millisecond counter (to avoid duplicates)
