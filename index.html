@@ -24,6 +24,7 @@
         jsPsych.data.
           get()
           .ignore(['plugin_version', 'trial_type'])
+          .localSave('csv', 'Trial.csv');;;
       }
     }
   );
@@ -128,7 +129,7 @@ timeline.push(preload)
   //elementary loop to make a huge list of triplets for experiment to last 8~ minutes
   //We figured out 50 repetitions of the 4 triplets --> last around 8~ minutes, can shorten it (just made it to test, as 20 repetitions was only 2 minutes.)
   //You can make it 0-1 so it's not long for trial-testing the entire experiment.
-  for (i = 0; i < 45; i++) {
+  for (i = 0; i< 45; i++) {
     trips_repetitions.push(study_triplets);
   }
   console.log(trips_repetitions);
@@ -315,15 +316,17 @@ timeline.push(preload)
       var order = Math.random() < 0.5 ? 0 : 1;
 
       var firstSequence, secondSequence;
-      if (order == 1) {
+      if (order == 0) {
         firstSequence = createImageTripletTimeline(study_triplet, "Sequence 1");
         secondSequence = createImageTripletTimeline(foil_triplet, "Sequence 2");
+        correct_response = '1';
         
         console.log(firstSequence)
         console.log(secondSequence)
       } else {
         firstSequence = createImageTripletTimeline(foil_triplet, "Sequence 1");
         secondSequence = createImageTripletTimeline(study_triplet, "Sequence 2");
+        correct_response = '2';
         
         console.log(firstSequence)
         console.log(secondSequence)
@@ -344,7 +347,7 @@ timeline.push(preload)
         data: {
           test_triplet: study_triplet,
           foil_triplet: foil_triplet,
-          correct_response: order === 0 ? '1' : '2'
+          correct_response: correct_response
         },
         on_finish: function (data) {
           data.correct = data.response === data.correct_response;
