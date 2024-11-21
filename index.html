@@ -123,25 +123,10 @@
   };
 timeline.push(preload)
 
-  // These are ealier in our script but used later in the second half of experiment
-  var study_triplets = [
-    ['A', 'B', 'C'],
-    ['D', 'E', 'F'],
-    ['G', 'H', 'I'],
-    ['J', 'K', 'L'],
-  ];
 
-  var foil_triplets = [
-    ['A', 'E', 'I'],
-    ['D', 'H', 'L'],
-    ['G', 'K', 'C'],
-    ['J', 'B', 'F'],
-  ];
 
   var trips_repetitions = [];
-  //The problem with jsPsych.randomization.repeat(array, repetitions) is that it would make an array of objects.
-  //The problem with that is I previously used .flat() to make an array of arrays --> array
-  //But it doesn't work with an array of objects, so I just looped through it.
+  //elementary loop to make a huge list of triplets for experiment to last 8~ minutes
   //We figured out 50 repetitions of the 4 triplets --> last around 8~ minutes, can shorten it (just made it to test, as 20 repetitions was only 2 minutes.)
   //You can make it 0-1 so it's not long for trial-testing the entire experiment.
   for (i = 0; i < 45; i++) {
@@ -279,6 +264,21 @@ timeline.push(preload)
 
   }
 
+  var study_triplets = [
+    ['A', 'B', 'C'],
+    ['D', 'E', 'F'],
+    ['G', 'H', 'I'],
+    ['J', 'K', 'L'],
+  ];
+
+  console.log(study_triplets)
+  var foil_triplets = [
+    ['A', 'E', 'I'],
+    ['D', 'H', 'L'],
+    ['G', 'K', 'C'],
+    ['J', 'B', 'F'],
+  ];
+  console.log(foil_triplets)
 
   // Helper function to create a triplet presentation sequence
   function createImageTripletTimeline(triplet, sequence_label) {
@@ -311,40 +311,53 @@ timeline.push(preload)
     timeline.push(instructions);
     // Familiarity test logic
     var familiarity_test_trials = [];
-    study_triplets.forEach((study_triplet, index) => {
-      for (let i = 0; i < 2; i++) {
-        var foil_triplet = foil_triplets[index];
-        var order = Math.random() < 0.5 ? 0 : 1;
-        var firstSequence = createImageTripletTimeline(order === 0 ? study_triplet : foil_triplet, "Sequence 1");
-      var secondSequence = createImageTripletTimeline(order === 1 ? foil_triplet : study_triplet, "Sequence 2");
-        var pause_between_sequences = {
-          type: jsPsychHtmlKeyboardResponse,
-          stimulus: "<p></p>",
-          choices: "NO_KEYS",
-          trial_duration: 1000
-        };
+    study_triplets.forEach((study_triplet) => {
+      foil_triplets.forEach((foil_triplet) => {
+      var order = Math.random() < 0.5 ? 0 : 1;
 
+      var firstSequence, secondSequence;
+      if (order == 1) {
+        firstSequence = createImageTripletTimeline(study_triplet, "Sequence 1");
+        secondSequence = createImageTripletTimeline(foil_triplet, "Sequence 2");
+        
+        console.log(firstSequence)
+        console.log(secondSequence)
+      } else {
+        firstSequence = createImageTripletTimeline(foil_triplet, "Sequence 1");
+        secondSequence = createImageTripletTimeline(study_triplet, "Sequence 2");
+        
+        console.log(firstSequence)
+        console.log(secondSequence)
+      }
+
+      var pause_between_sequences = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<p></p>",
+        choices: "NO_KEYS",
+        trial_duration: 1000
+      };
+
+      //pressing 1 or 2
       var response_trial = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: "<p>Press '1' if the first sequence was familiar, '2' if the second was.</p>",
         choices: ['1', '2'],
         data: {
-    test_triplet: study_triplet,
-    foil_triplet: foil_triplet,
-    correct_response: order === 0 ? '1' : '2'
-  },
-  on_finish: function (data) {
-    data.correct = data.response === data.correct_response;
-    
-    // Extract and save only the image paths for the sequences
-    data.firstSequencePaths = firstSequence.map(trial => trial.stimulus);
-    data.secondSequencePaths = secondSequence.map(trial => trial.stimulus);
-  }
-};
+          test_triplet: study_triplet,
+          foil_triplet: foil_triplet,
+          correct_response: order === 0 ? '1' : '2'
+        },
+        on_finish: function (data) {
+          data.correct = data.response === data.correct_response;
+          
+          data.firstSequencePaths = firstSequence.map(trial => trial.stimulus);
+          data.secondSequencePaths = secondSequence.map(trial => trial.stimulus);
+        }
+      };
 
-      familiarity_test_trials.push(...firstSequence, pause_between_sequences, ...secondSequence, response_trial);
-    }
+    familiarity_test_trials.push(...firstSequence, pause_between_sequences, ...secondSequence, response_trial);
   });
+});
 
   timeline.push(...familiarity_test_trials);
 
@@ -356,7 +369,10 @@ timeline.push(preload)
     { prompt: "What do you think this experiment was about?" },
     { prompt: "Did you encounter any technical issues?" },
     { prompt: "Was it hard to recall the sequences" }
-  ]
+  ],
+  on_finish: function(data){
+    console.log(data)
+  }
   }
   timeline.push(participant_survey);
 
