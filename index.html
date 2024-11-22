@@ -111,7 +111,8 @@ timeline.push(preload)
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
   <p>For this trial, you will see a series of images.</p>
-  <p>Press the spacebar whenever you see a repeat of an image back to back.</p>
+  <p>Press the spacebar whenever you see the same image appear twice in a row.</p>
+  <p>In other words, whener the same image repeats back to back, press the spacebar.</p>
   <p>Press any key to begin.</p>`
   };
 
@@ -298,9 +299,10 @@ var study_triplets = [
   var instructions_2 = {
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
-    <p>For this trial, you will see a sequneces of images.</p>
-    <p>Press 1 or 2 if the first or second sequence felt familiar..</p>
-    <p>Press any key to begin.</p>`
+    <div style='width:900px;margin: auto;'><p>In the next part of the experiment, we want to see how well you learned the structure in the stream of images.</p>
+    <p>On each trial, you will see two sequences of three images, sequence 1 and 2. We will ask you to indicate which sequence was more familiar based on the first part of the experiment.</p>
+    <p>Press 1 the first sequence (sequence 1) felt familiar. Press 2 if the second sequence (sequence 2) felt familiar.</p>
+    <p>Press any key to begin.</p></div>`
     };
   
     //add the instructions trial to the timeline
@@ -363,6 +365,7 @@ console.log(familiarity_test_trials);
 shuffled_familiarity_test_trials = jsPsych.randomization.repeat(familiarity_test_trials,1);
 
 console.log(shuffled_familiarity_test_trials);
+timeline.push(...shuffled_familiarity_test_trials);
 
 //cycle through familiarization trials and add to timeline
 for (i=0;i<shuffled_familiarity_test_trials.length;i++) {
