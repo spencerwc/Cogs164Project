@@ -40,6 +40,44 @@
   /* create timeline */
   var timeline = [];
 
+    /* create stimulus list */
+  //first create a list of categories
+  var category_list = ["bar", "bathroom", "bridge", "coast", "gym", "desert", "kitchen", "field", "playground", "stream", "street", "woods"]
+  //shuffle
+  var category_list_shuffled = jsPsych.randomization.shuffle(category_list);
+  console.log(category_list_shuffled)
+
+  //now define the roles in the triplets based on the randomized position of the items in the array (A=0, B=1, ...)
+  //note that we are always selecting the first image here, but we could also randomly select from the set of images for each category here
+  // define key elements of the image
+  var img_extension = ".jpg"
+  var img_path = "stimuli/"
+  var stimulus_list = {
+    A: { category: category_list_shuffled[0], image_name: img_path + category_list_shuffled[0] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    B: { category: category_list_shuffled[1], image_name: img_path + category_list_shuffled[1] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    C: { category: category_list_shuffled[2], image_name: img_path + category_list_shuffled[2] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    D: { category: category_list_shuffled[3], image_name: img_path + category_list_shuffled[3] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    E: { category: category_list_shuffled[4], image_name: img_path + category_list_shuffled[4] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    F: { category: category_list_shuffled[5], image_name: img_path + category_list_shuffled[5] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    G: { category: category_list_shuffled[6], image_name: img_path + category_list_shuffled[6] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    H: { category: category_list_shuffled[7], image_name: img_path + category_list_shuffled[7] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    I: { category: category_list_shuffled[8], image_name: img_path + category_list_shuffled[8] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    J: { category: category_list_shuffled[9], image_name: img_path + category_list_shuffled[9] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    K: { category: category_list_shuffled[10], image_name: img_path + category_list_shuffled[10] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
+    L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension }
+  };
+
+  //preloading pulled from Peter's branch
+  // Extract the image paths for preloading
+  var image_paths = Object.values(stimulus_list).map(item => item.image_name);
+
+  // Set up the preload with the specific image paths
+  var preload = {
+    type: jsPsychPreload,
+    images: image_paths // Specify the images array for preloading
+  };
+timeline.push(preload)
+
   /* welcome */
   var welcome = {
     type: jsPsychHtmlKeyboardResponse,
@@ -79,44 +117,6 @@
 
   //add the instructions trial to the timeline
   timeline.push(instructions);
-
-  /* create stimulus list */
-  //first create a list of categories
-  var category_list = ["bar", "bathroom", "bridge", "coast", "gym", "desert", "kitchen", "field", "playground", "stream", "street", "woods"]
-  //shuffle
-  var category_list_shuffled = jsPsych.randomization.shuffle(category_list);
-  console.log(category_list_shuffled)
-
-  //now define the roles in the triplets based on the randomized position of the items in the array (A=0, B=1, ...)
-  //note that we are always selecting the first image here, but we could also randomly select from the set of images for each category here
-  // define key elements of the image
-  var img_extension = ".jpg"
-  var img_path = "stimuli/"
-  var stimulus_list = {
-    A: { category: category_list_shuffled[0], image_name: img_path + category_list_shuffled[0] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    B: { category: category_list_shuffled[1], image_name: img_path + category_list_shuffled[1] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    C: { category: category_list_shuffled[2], image_name: img_path + category_list_shuffled[2] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    D: { category: category_list_shuffled[3], image_name: img_path + category_list_shuffled[3] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    E: { category: category_list_shuffled[4], image_name: img_path + category_list_shuffled[4] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    F: { category: category_list_shuffled[5], image_name: img_path + category_list_shuffled[5] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    G: { category: category_list_shuffled[6], image_name: img_path + category_list_shuffled[6] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    H: { category: category_list_shuffled[7], image_name: img_path + category_list_shuffled[7] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    I: { category: category_list_shuffled[8], image_name: img_path + category_list_shuffled[8] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    J: { category: category_list_shuffled[9], image_name: img_path + category_list_shuffled[9] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    K: { category: category_list_shuffled[10], image_name: img_path + category_list_shuffled[10] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension },
-    L: { category: category_list_shuffled[11], image_name: img_path + category_list_shuffled[11] + "_" + jsPsych.randomization.randomInt(1, 68) + img_extension }
-  };
-
-  //preloading pulled from Peter's branch
-  // Extract the image paths for preloading
-  var image_paths = Object.values(stimulus_list).map(item => item.image_name);
-
-  // Set up the preload with the specific image paths
-  var preload = {
-    type: jsPsychPreload,
-    images: image_paths // Specify the images array for preloading
-  };
-timeline.push(preload)
 
 var study_triplets = [
     ['A', 'B', 'C'],
@@ -353,11 +353,22 @@ var study_triplets = [
         }
       };
 
-    familiarity_test_trials.push(...firstSequence, pause_between_sequences, ...secondSequence, response_trial);
+    familiarity_test_trials.push([...firstSequence, pause_between_sequences, ...secondSequence, response_trial]);
   });
 });
 
-  timeline.push(...familiarity_test_trials);
+console.log(familiarity_test_trials);
+
+//shuffle the order of the familiarity test trials
+shuffled_familiarity_test_trials = jsPsych.randomization.repeat(familiarity_test_trials,1);
+
+console.log(shuffled_familiarity_test_trials);
+
+//cycle through familiarization trials and add to timeline
+for (i=0;i<shuffled_familiarity_test_trials.length;i++) {
+  var current_test_trial = shuffled_familiarity_test_trials[i];
+  timeline.concat(current_test_trial)
+}
 
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //this portion of the code ensures that the data gets sent to be stored on OSF
@@ -366,7 +377,7 @@ var study_triplets = [
     questions: [
     { prompt: "What do you think this experiment was about?" },
     { prompt: "Did you encounter any technical issues?" },
-    { prompt: "Was it hard to recall the sequences" }
+    { prompt: "Was it hard to recall the sequences?" }
   ],
   on_finish: function(data){
     console.log(data)
@@ -374,14 +385,6 @@ var study_triplets = [
   }
   timeline.push(participant_survey);
 
-var debrief = {
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: `
-    <p>Thank you for participating!</p>
-    <p>This experiment was designed to study how people recognize patterns in images.</p>
-    <p>Press any key to finish.</p>`,
-};
-timeline.push(debrief);
   const save_data = {
     type: jsPsychPipe,
     action: "save",
@@ -392,7 +395,14 @@ timeline.push(debrief);
   timeline.push(save_data);
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
 
-
+  var debrief = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: `
+    <p>Thank you for participating!</p>
+    <p>This experiment was designed to study how people recognize patterns in images.</p>
+    <p>Press any key to finish.</p>`,
+};
+timeline.push(debrief);
 
   /* start the experiment */
   jsPsych.run(timeline);
