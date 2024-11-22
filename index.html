@@ -18,7 +18,11 @@
 <script>
 
   /* initialize jsPsych */
-  var jsPsych = initJsPsych();
+  var jsPsych = initJsPsych(
+    {
+      show_progress_bar: true
+    }
+  );
 
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //create a unique filename by combining a random string and a millisecond counter (to avoid duplicates)
