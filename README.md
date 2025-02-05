@@ -1,5 +1,5 @@
-# Visual Statistical Learning Experiment
+# Learning, Music, and Motivation Experiment
 
 To run the experiment, click on the following link:
 
-https://cogs119.github.io/group_fa24_statistical_learning/
+https://cogs119.github.io/Cogs164Project
