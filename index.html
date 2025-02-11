@@ -40,18 +40,10 @@
   /* create timeline */
   var timeline = [];
 
-
-  // Set up the preload with the specific image paths
-  var preload = {
-    type: jsPsychPreload,
-    images: image_paths // Specify the images array for preloading
-  };
-timeline.push(preload)
-
   /* welcome */
   var welcome = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "Welcome to the experiment. Press any key to begin.",
+    stimulus: "Welcome to the experiment! Press any key to continue.",
   };
 
   /* full screen */
@@ -61,28 +53,16 @@ timeline.push(preload)
   }
   timeline.push(enter_fullscreen);
 
-  /* participant ID */
-  var participant_id_entry = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Please enter your participant ID (e.g. p1):", name: "participant_id" }],
-    on_finish: function (data) {
-      console.log(data.response)
-      jsPsych.data.addProperties({
-        participant: data.response.participant_id
-      });
-    }
-  };
-
   timeline.push(welcome);
 
-  timeline.push(participant_id_entry);
   /* instructions*/
   var instructions = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
-  <p>For this trial, you will see a series of images.</p>
-  <p><b>Press the spacebar whenever you see the same image appear twice in a row.</b></p>
-  <p>In other words, whenever the same image repeats back to back, press the spacebar.</p>
+  <p>In this test, you will complete a series of pattern-based puzzles known as <b>Raven’s Progressive Matrices</b>.</p>
+  <p>Each question will present a pattern with a missing piece,</p>
+  <p>and your task is to select the option that best completes the pattern.</p>
+  <p>These are not timed, so take as much time as you need.</p>
   <p>Press any key to begin.</p>`
   };
 
@@ -104,12 +84,13 @@ timeline.push(preload)
   }
   timeline.push(participant_survey);
 
+  
   const save_data = {
     type: jsPsychPipe,
     action: "save",
-    experiment_id: "PAfzfuHy0doi",
+    experiment_id: "wCWH7aO7xiIT",
     filename: filename,
-    data_string: () => jsPsych.data.get().csv()
+    data_string: ()=>jsPsych.data.get().csv()
   };
   timeline.push(save_data);
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
