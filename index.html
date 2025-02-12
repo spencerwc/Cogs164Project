@@ -9,6 +9,8 @@
   <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
   <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
   <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />
   <!-- This is for data storage - please be sure to keep this script in all future updates to the code!! -->
   <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
@@ -55,6 +57,21 @@
 
   timeline.push(welcome);
 
+// Preload images
+const preload = {
+  type: jsPsychPreload,
+  images: [
+    "stimuli/a1_test.png",
+    "stimuli/a1_answer1.png",
+    "stimuli/a1_answer2.png",
+    "stimuli/a1_answer3.png",
+    "stimuli/a1_answer4.png",
+    "stimuli/a1_answer5.png",
+    "stimuli/a1_answer6.png"
+  ]
+};
+timeline.push(preload);
+
   /* instructions*/
   var instructions = {
     type: jsPsychHtmlKeyboardResponse,
@@ -69,6 +86,53 @@
   //add the instructions trial to the timeline
   timeline.push(instructions);
 
+  var likert_scale = [
+  "Strongly Disagree", 
+  "Disagree", 
+  "Neutral", 
+  "Agree", 
+  "Strongly Agree"
+];
+
+var pretest_likert = {
+  type: jsPsychSurveyLikert,
+  questions: [
+    {prompt: "I feel motivated to take this experiment", name: 'Experiment', labels: likert_scale},
+    {prompt: "I enjoy listening to music while I study", name: 'Study', labels: likert_scale},
+    {prompt: "I like learning new things", name: 'Learning', labels: likert_scale},
+  ],
+  randomize_question_order: true
+};
+timeline.push(pretest_likert);
+
+const trial_stimuli = [
+  {
+    stimulus: "stimuli/a1_test.png",  // Test matrix
+    choices: [
+      "stimuli/a1_answer1.png",
+      "stimuli/a1_answer2.png",
+      "stimuli/a1_answer3.png",
+      "stimuli/a1_answer4.png",
+      "stimuli/a1_answer5.png",
+      "stimuli/a1_answer6.png"
+    ],
+    correct_choice: 4  // Adjust this based on the correct answer (0-based index)
+  }
+];
+
+const rpm_trials = trial_stimuli.map((stim) => ({
+  type: jsPsychImageButtonResponse,
+  stimulus: stim.stimulus,
+  choices: stim.choices,
+  button_html: '<img src="%choice%" style="width:100px;height:100px;">',
+  data: { correct_choice: stim.correct_choice },
+  on_finish: function(data) {
+    data.correct = (data.response === data.correct_choice);
+  }
+}));
+
+timeline.push(...rpm_trials); // <-- Fix: Spread the array so trials are added correctly
+
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //this portion of the code ensures that the data gets sent to be stored on OSF
   var participant_survey = {
@@ -76,7 +140,7 @@
     questions: [
     { prompt: "What do you think this experiment was about?" },
     { prompt: "Did you encounter any technical issues?" },
-    { prompt: "Was it hard to recall the sequences?" }
+    { prompt: "Was it hard to figure out the puzzles?" }
   ],
   on_finish: function(data){
     console.log(data)
@@ -99,7 +163,8 @@
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <p>Thank you for participating!</p>
-    <p>This experiment was designed to study how people recognize patterns in images.</p>
+    <p>This experiment was designed to study if peoples motivation changes when learning</p>
+    <p>and listening to different music.</p>
     <p>Press any key to finish.</p>`,
 };
 timeline.push(debrief);
