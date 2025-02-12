@@ -107,29 +107,41 @@ timeline.push(pretest_likert);
 
 const trial_stimuli = [
   {
-    stimulus: "stimuli/a1_test.png",  // Test matrix
+    stimulus: "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_test.png",  // Test matrix
     choices: [
-      "stimuli/a1_answer1.png",
-      "stimuli/a1_answer2.png",
-      "stimuli/a1_answer3.png",
-      "stimuli/a1_answer4.png",
-      "stimuli/a1_answer5.png",
-      "stimuli/a1_answer6.png"
+      "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_answer1.png",
+      "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_answer2.png",
+      "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_answer3.png",
+      "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_answer4.png",
+      "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_answer5.png",
+      "https://github.com/somethingrotten/Cogs164Project/raw/main/stimuli/a1_answer6.png"
     ],
-    correct_choice: 4  // Adjust this based on the correct answer (0-based index)
+    correct_choice: 4
   }
 ];
+
 
 const rpm_trials = trial_stimuli.map((stim) => ({
   type: jsPsychImageButtonResponse,
   stimulus: stim.stimulus,
   choices: stim.choices,
-  button_html: '<img src="%choice%" style="width:100px;height:100px;">',
+  button_html: function() {
+    return '<img src="' + stim.choice + '" style="width: 150px; height: 150px; margin: 5px;">'; // Ensure it's using the correct choice path
+  },
   data: { correct_choice: stim.correct_choice },
+  css: {
+    display: 'flex',
+    justifyContent: 'center', 
+    alignItems: 'center', // Ensure vertical centering
+    flexWrap: 'wrap', 
+    gap: '15px',       
+    maxWidth: '100%', 
+  },
   on_finish: function(data) {
     data.correct = (data.response === data.correct_choice);
   }
 }));
+
 
 timeline.push(...rpm_trials); // <-- Fix: Spread the array so trials are added correctly
 
