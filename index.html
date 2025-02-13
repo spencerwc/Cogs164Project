@@ -104,6 +104,7 @@ var pretest_likert = {
   randomize_question_order: true
 };
 timeline.push(pretest_likert);
+
 // Function to present words with fixation cross
 function create_word_trials(word_list, label) {
   let trials = [];
@@ -129,7 +130,7 @@ function create_word_trials(word_list, label) {
   return trials;
 }
 
-// 🎯 **Encoding Phase (List A)**
+// **Encoding Phase (List A)**
 var word_list_A = [
                   "apple", 
                   "table", 
@@ -202,6 +203,17 @@ var recognition_trials = all_words.map(word => ({
   choices: ["Yes", "No"]
 }));
 timeline.push(...recognition_trials);
+
+var posttest_likert = {
+  type: jsPsychSurveyLikert,
+  questions: [
+    {prompt: "I felt like the lofi helped me focus", name: 'lofi', labels: likert_scale},
+    {prompt: "I enjoyed listening to music while I did the experiment", name: 'Enjoyment', labels: likert_scale},
+    {prompt: "I felt more motivated to try when listening to music", name: 'Motive', labels: likert_scale},
+  ],
+  randomize_question_order: true
+};
+timeline.push(posttest_likert);
 
   //PLEASE KEEP FOR ALL FUTURE ITERATIONS
   //this portion of the code ensures that the data gets sent to be stored on OSF
