@@ -37,7 +37,6 @@
             const audio_test = document.getElementById('audio_test');
             audio_test.addEventListener('volumechange', function () {
                 audio.volume = audio_test.volume;
-                console.log(audio.volume);
             });
         }
 
@@ -47,7 +46,7 @@
                 return null;
             }
             let index = Math.floor(Math.random() * audioTracks.length);
-            return audioTracks.splice(index, 1)[0]; // Removes selected track from array
+            return audioTracks.splice(index, 1)[0];
         }
 
         // Load trial audio
@@ -141,12 +140,13 @@
 
         // Audio settings test trial
         var audio_test = {
-            type: jsPsychHtmlKeyboardResponse,
+            type: jsPsychHtmlButtonResponse,
             on_load: addVolumeChangeEvent,
             stimulus: `
-              <p>Before continuing, please adjust your audio settings using the player below. Press any key to continue.</p>
-              <div><audio id="audio_test" controls src="audio/test.wav"></audio></div>
+              <p>Before continuing, please adjust your volume setting using the player below.</p>
+              <div><audio id="audio_test" controls controlsList = "noplaybackrate nodownload" src="audio/test.wav"></audio></div>
             `,
+            choices: ['Continue'],
         };
         timeline.push(audio_test);
 
@@ -177,14 +177,20 @@
             return trials;
         }
 
-        // ⭐ Add a start trial screen to load music for the first trial ⭐
-        var start_first_trial_audio = {
+        // ⭐ Add a start trial screen to load music for the trial ⭐
+        var start_trial_audio = {
             type: jsPsychHtmlKeyboardResponse,
-            on_finish: loadAudio,
-            stimulus:
-                'This will load the audio for the first trial. Press any key to continue.',
+            choices: 'NO_KEYS',
+            on_start: function () {
+                stopAudio();
+                loadAudio();
+            },
+            stimulus: `<p>This will load the audio for the trial.</p>
+                <p><strong>The trial will begin in 5 seconds.<strong></p>`,
+            trial_duration: 5000,
         };
-        timeline.push(start_first_trial_audio);
+        // ⭐ Add a start trial screen to change audio⭐
+        timeline.push(start_trial_audio);
 
         // Encoding Phase (List A)
         var word_list_A = [
@@ -215,17 +221,10 @@
         };
         timeline.push(immediate_recall);
 
-        // ⭐ Add a start trial screen to load music for the second trial ⭐
-        var start_second_trial_audio = {
-            type: jsPsychHtmlKeyboardResponse,
-            on_start: stopAudio,
-            on_finish: loadAudio,
-            stimulus:
-                'This will load the audio for the trial. Press any key to start.',
-        };
-        timeline.push(start_second_trial_audio);
+        // ⭐ Add a start trial screen to change audio⭐
+        timeline.push(start_trial_audio);
 
-        // **Interference List (New Word List B)**
+        // Interference List (New Word List B)
         var word_list_B = [
             'phone',
             'candle',
@@ -362,7 +361,7 @@
         };
         timeline.push(debrief);
 
-        /* start the experiment */
+        // Start the experiment
         jsPsych.run(timeline);
     </script>
 </html>
