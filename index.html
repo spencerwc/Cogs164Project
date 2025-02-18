@@ -1,244 +1,368 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <title>SL Experiment</title>
+        <script src="https://unpkg.com/jspsych@8.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.1.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-audio-keyboard-response@2.1.0"></script>
+        <link
+            href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <!-- This is for data storage - please be sure to keep this script in all future updates to the code!! -->
+        <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+    </head>
 
-<head>
-  <title>SL Experiment</title>
-  <script src="https://unpkg.com/jspsych@8.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.1.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
-  <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />
-  <!-- This is for data storage - please be sure to keep this script in all future updates to the code!! -->
-  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
-</head>
+    <body>
+        <audio id="audio" controls src="" style="display: none"></audio>
+    </body>
 
-<body></body>
-<script>
+    <script>
+        // Set up audio helper functions
+        const audio = document.getElementById('audio');
 
-  /* initialize jsPsych */
-  var jsPsych = initJsPsych(
-    {
-      show_progress_bar: true
-    }
-  );
+        // Track options
+        const audioTracks = ['instrumental.mp3', 'vocal.mp3'];
 
-  //PLEASE KEEP FOR ALL FUTURE ITERATIONS
-  //create a unique filename by combining a random string and a millisecond counter (to avoid duplicates)
-  var random_id = jsPsych.randomization.randomID(10);
-  const date = new Date();
-  random_id = "p"+random_id.toString();
-  var file_id = random_id + "_" + date.getTime().toString();
-  const filename = `${file_id}.csv`;
-  //also store the random id for convenience
-  jsPsych.data.addProperties({
-        random_id: random_id,
-      });
-  //PLEASE KEEP FOR ALL FUTURE ITERATIONS
+        // Add volume change listener to audio test to save ideal volume settings
+        function addVolumeChangeEvent() {
+            const audio_test = document.getElementById('audio_test');
+            audio_test.addEventListener('volumechange', function () {
+                audio.volume = audio_test.volume;
+                console.log(audio.volume);
+            });
+        }
 
-  /* create timeline */
-  var timeline = [];
+        // Randomly pick a track and remove it from the array
+        function pickRandomTrack() {
+            if (audioTracks.length === 0) {
+                return null;
+            }
+            let index = Math.floor(Math.random() * audioTracks.length);
+            return audioTracks.splice(index, 1)[0]; // Removes selected track from array
+        }
 
-  /* welcome */
-  var welcome = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: "Welcome to the experiment! Press any key to continue.",
-  };
+        // Load trial audio
+        function loadAudio() {
+            const track = pickRandomTrack();
+            audio.src = `audio/${track}`;
+            audio.play();
+        }
 
-  /* full screen */
-  var enter_fullscreen = {
-    type: jsPsychFullscreen,
-    fullscreen_mode: true
-  }
-  timeline.push(enter_fullscreen);
+        // Stop trial audio
+        function stopAudio() {
+            audio.pause();
+        }
 
-  timeline.push(welcome);
+        // Initialize jsPsych
+        var jsPsych = initJsPsych({
+            show_progress_bar: true,
+        });
 
-  /* instructions*/
-  var instructions = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `
-  <p>In this experiment, you will see a list of words and try to remember as many as possible.</p>
-  <p>Afterward, you will be asked to recall them. Later, you will see another list and do the same.</p>
-  <p>There will also be a delayed recall test at the end as well as a couple surveys.</p>
-  <p>Press any key to begin.</p>`
-  };
+        // PLEASE KEEP FOR ALL FUTURE ITERATIONS
+        // Create a unique filename by combining a random string and a millisecond counter (to avoid duplicates)
+        var random_id = jsPsych.randomization.randomID(10);
+        const date = new Date();
+        random_id = 'p' + random_id.toString();
+        var file_id = random_id + '_' + date.getTime().toString();
+        const filename = `${file_id}.csv`;
+        //also store the random id for convenience
+        jsPsych.data.addProperties({
+            random_id: random_id,
+        });
 
-  //add the instructions trial to the timeline
-  timeline.push(instructions);
+        // Create timeline
+        var timeline = [];
 
-  var likert_scale = [
-  "Strongly Disagree", 
-  "Disagree", 
-  "Neutral", 
-  "Agree", 
-  "Strongly Agree"
-];
+        // Fullscreen
+        var enter_fullscreen = {
+            type: jsPsychFullscreen,
+            fullscreen_mode: true,
+        };
+        timeline.push(enter_fullscreen);
 
-var pretest_likert = {
-  type: jsPsychSurveyLikert,
-  questions: [
-    {prompt: "I would like to learn something new today", name: 'Experiment', labels: likert_scale},
-    {prompt: "I enjoy listening to music while I study", name: 'Study', labels: likert_scale},
-    {prompt: "I listen to music consistently throughout the day", name: 'Music', labels: likert_scale},
-  ],
-  randomize_question_order: true
-};
-timeline.push(pretest_likert);
+        // Welcome trial
+        var welcome = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: 'Welcome to the experiment! Press any key to continue.',
+        };
+        timeline.push(welcome);
 
-// Function to present words with fixation cross
-function create_word_trials(word_list, label) {
-  let trials = [];
-  word_list.forEach(word => {
-    // Fixation cross trial
-    trials.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<p style="font-size: 40px;">+</p>`,
-      choices: "NO_KEYS",
-      trial_duration: 500,  // Fixation cross shown for 500ms
-      data: { phase: label, type: "fixation" }
-    });
+        // Instructions trial
+        var instructions = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `
+              <p>In this experiment, you will see a list of words and try to remember as many as possible.</p>
+              <p>Afterward, you will be asked to recall them. Later, you will see another list and do the same.</p>
+              <p>There will also be a delayed recall test at the end as well as a couple surveys.</p>
+              <p>Press any key to begin.</p>`,
+        };
+        timeline.push(instructions);
 
-    // Word presentation trial
-    trials.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<p style="font-size: 32px;">${word}</p>`,
-      choices: "NO_KEYS",
-      trial_duration: 1000,  // Word displayed for 1 sec
-      data: { phase: label, type: "word", word: word }
-    });
-  });
-  return trials;
-}
+        var likert_scale = [
+            'Strongly Disagree',
+            'Disagree',
+            'Neutral',
+            'Agree',
+            'Strongly Agree',
+        ];
 
-// **Encoding Phase (List A)**
-var word_list_A = [
-                  "apple", 
-                  "table", 
-                  "dog", 
-                  "sun", 
-                  "chair", 
-                  "pencil", 
-                  "river", 
-                  "moon", 
-                  "house", 
-                  "flower"
-                ];
-timeline.push(...create_word_trials(word_list_A, "encoding"));
+        // Baseline evaluation
+        var pretest_likert = {
+            type: jsPsychSurveyLikert,
+            questions: [
+                {
+                    prompt: 'I would like to learn something new today',
+                    name: 'Experiment',
+                    labels: likert_scale,
+                },
+                {
+                    prompt: 'I enjoy listening to music while I study',
+                    name: 'Study',
+                    labels: likert_scale,
+                },
+                {
+                    prompt: 'I listen to music consistently throughout the day',
+                    name: 'Music',
+                    labels: likert_scale,
+                },
+            ],
+            randomize_question_order: true,
+        };
+        timeline.push(pretest_likert);
 
-// ⏳ **Immediate Recall (Participants Type Words)**
-var immediate_recall = {
-  type: jsPsychSurveyText,
-  questions: [{prompt: "List all the words you remember:", rows: 5, columns: 40}],
-  data: { phase: "immediate_recall" }
-};
-timeline.push(immediate_recall);
+        // Audio settings test trial
+        var audio_test = {
+            type: jsPsychHtmlKeyboardResponse,
+            on_load: addVolumeChangeEvent,
+            stimulus: `
+              <p>Before continuing, please adjust your audio settings using the player below. Press any key to continue.</p>
+              <div><audio id="audio_test" controls src="audio/test.wav"></audio></div>
+            `,
+        };
+        timeline.push(audio_test);
 
-// **Interference List (New Word List B)**
-var word_list_B = [
-                  "phone", 
-                  "candle", 
-                  "ocean", 
-                  "guitar", 
-                  "mouse", 
-                  "book",
-                  "lamp", 
-                  "bridge", 
-                  "mountain", 
-                  "car"
-                ];
-timeline.push(...create_word_trials(word_list_B, "interference"));
+        // Function to present words with fixation cross
+        function create_word_trials(word_list, label) {
+            let trials = [];
 
+            word_list.forEach((word) => {
+                // Fixation cross trial
+                trials.push({
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<p style="font-size: 40px;">+</p>`,
+                    choices: 'NO_KEYS',
+                    trial_duration: 500, // Fixation cross shown for 500ms
+                    data: { phase: label, type: 'fixation' },
+                });
 
-var math_problems = [
-  { question: "8 × 3 = ?", choices: ["21", "24", "26", "28"], correct_index: 1 },
-  { question: "15 - 9 = ?", choices: ["5", "6", "7", "8"], correct_index: 1 },
-  { question: "25 ÷ 5 = ?", choices: ["4", "5", "6", "7"], correct_index: 1 }
-];
+                // Word presentation trial
+                trials.push({
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<p style="font-size: 32px;">${word}</p>`,
+                    choices: 'NO_KEYS',
+                    trial_duration: 1000, // Word displayed for 1 sec
+                    data: { phase: label, type: 'word', word: word },
+                });
+            });
 
-// Generate trials
-math_problems.forEach((problem) => {
-  timeline.push({
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `<p>${problem.question}</p>`,
-    choices: problem.choices,
-    data: { phase: "math_distractor", correct_choice: problem.correct_index },
-    on_finish: function(data) {
-      data.correct = (data.response === problem.correct_index);
-    }
-  });
-});
+            return trials;
+        }
 
-// Delayed Recall (After Interference)
-var delayed_recall = {
-  type: jsPsychSurveyText,
-  questions: [{prompt: "List all the words you remember from the FIRST list:", rows: 5, columns: 40}]
-};
-timeline.push(delayed_recall);
+        // ⭐ Add a start trial screen to load music for the first trial ⭐
+        var start_first_trial_audio = {
+            type: jsPsychHtmlKeyboardResponse,
+            on_finish: loadAudio,
+            stimulus:
+                'This will load the audio for the first trial. Press any key to continue.',
+        };
+        timeline.push(start_first_trial_audio);
 
-// Recognition Test (Mix of Old and New Words)
-var all_words = jsPsych.randomization.shuffle([...word_list_A, ...word_list_B, "tree", "window", "cloud"]);
-var recognition_trials = all_words.map(word => ({
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `<p>Did you see this word in the FIRST list?</p><p><strong>${word}</strong></p>`,
-  choices: ["Yes", "No"]
-}));
-timeline.push(...recognition_trials);
+        // Encoding Phase (List A)
+        var word_list_A = [
+            'apple',
+            'table',
+            'dog',
+            'sun',
+            'chair',
+            'pencil',
+            'river',
+            'moon',
+            'house',
+            'flower',
+        ];
+        timeline.push(...create_word_trials(word_list_A, 'encoding'));
 
-var posttest_likert = {
-  type: jsPsychSurveyLikert,
-  questions: [
-    {prompt: "I felt like the lofi helped me focus", name: 'lofi', labels: likert_scale},
-    {prompt: "I enjoyed listening to music while I did the experiment", name: 'Enjoyment', labels: likert_scale},
-    {prompt: "I felt more motivated to try when listening to music", name: 'Motive', labels: likert_scale},
-  ],
-  randomize_question_order: true
-};
-timeline.push(posttest_likert);
+        // Immediate Recall (Participants Type Words)
+        var immediate_recall = {
+            type: jsPsychSurveyText,
+            questions: [
+                {
+                    prompt: 'List all the words you remember:',
+                    rows: 5,
+                    columns: 40,
+                },
+            ],
+            data: { phase: 'immediate_recall' },
+        };
+        timeline.push(immediate_recall);
 
-  //PLEASE KEEP FOR ALL FUTURE ITERATIONS
-  //this portion of the code ensures that the data gets sent to be stored on OSF
-  var participant_survey = {
-    type: jsPsychSurveyText,
-    questions: [
-    { prompt: "What do you think this experiment was about?" },
-    { prompt: "Did you encounter any technical issues?" },
-    { prompt: "Was it hard to figure out the puzzles?" }
-  ],
-  on_finish: function(data){
-    console.log(data)
-  }
-  }
-  timeline.push(participant_survey);
+        // ⭐ Add a start trial screen to load music for the second trial ⭐
+        var start_second_trial_audio = {
+            type: jsPsychHtmlKeyboardResponse,
+            on_start: stopAudio,
+            on_finish: loadAudio,
+            stimulus:
+                'This will load the audio for the trial. Press any key to start.',
+        };
+        timeline.push(start_second_trial_audio);
 
-  
-  const save_data = {
-    type: jsPsychPipe,
-    action: "save",
-    experiment_id: "wCWH7aO7xiIT",
-    filename: filename,
-    data_string: ()=>jsPsych.data.get().csv()
-  };
-  timeline.push(save_data);
-  //PLEASE KEEP FOR ALL FUTURE ITERATIONS
+        // **Interference List (New Word List B)**
+        var word_list_B = [
+            'phone',
+            'candle',
+            'ocean',
+            'guitar',
+            'mouse',
+            'book',
+            'lamp',
+            'bridge',
+            'mountain',
+            'car',
+        ];
+        timeline.push(...create_word_trials(word_list_B, 'interference'));
 
-  var debrief = {
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: `
-    <p>Thank you for participating!</p>
-    <p>This experiment was designed to study if peoples motivation changes when learning</p>
-    <p>and listening to different music.</p>
-    <p>Press any key to finish.</p>`,
-};
-timeline.push(debrief);
+        var math_problems = [
+            {
+                question: '8 × 3 = ?',
+                choices: ['21', '24', '26', '28'],
+                correct_index: 1,
+            },
+            {
+                question: '15 - 9 = ?',
+                choices: ['5', '6', '7', '8'],
+                correct_index: 1,
+            },
+            {
+                question: '25 ÷ 5 = ?',
+                choices: ['4', '5', '6', '7'],
+                correct_index: 1,
+            },
+        ];
 
-  /* start the experiment */
-  jsPsych.run(timeline);
+        // Generate trials
+        math_problems.forEach((problem) => {
+            timeline.push({
+                type: jsPsychHtmlButtonResponse,
+                stimulus: `<p>${problem.question}</p>`,
+                choices: problem.choices,
+                data: {
+                    phase: 'math_distractor',
+                    correct_choice: problem.correct_index,
+                },
+                on_finish: function (data) {
+                    data.correct = data.response === problem.correct_index;
+                },
+            });
+        });
 
-</script>
+        // Delayed Recall (After Interference)
+        var delayed_recall = {
+            type: jsPsychSurveyText,
+            questions: [
+                {
+                    prompt: 'List all the words you remember from the FIRST list:',
+                    rows: 5,
+                    columns: 40,
+                },
+            ],
+        };
+        timeline.push(delayed_recall);
 
+        // Recognition Test (Mix of Old and New Words)
+        var all_words = jsPsych.randomization.shuffle([
+            ...word_list_A,
+            ...word_list_B,
+            'tree',
+            'window',
+            'cloud',
+        ]);
+        var recognition_trials = all_words.map((word) => ({
+            type: jsPsychHtmlButtonResponse,
+            stimulus: `<p>Did you see this word in the FIRST list?</p><p><strong>${word}</strong></p>`,
+            choices: ['Yes', 'No'],
+        }));
+        timeline.push(...recognition_trials);
+
+        // Reflection survey
+        var posttest_likert = {
+            type: jsPsychSurveyLikert,
+            on_start: stopAudio,
+            questions: [
+                {
+                    prompt: 'I felt like the lofi helped me focus',
+                    name: 'lofi',
+                    labels: likert_scale,
+                },
+                {
+                    prompt: 'I enjoyed listening to music while I did the experiment',
+                    name: 'Enjoyment',
+                    labels: likert_scale,
+                },
+                {
+                    prompt: 'I felt more motivated to try when listening to music',
+                    name: 'Motive',
+                    labels: likert_scale,
+                },
+            ],
+            randomize_question_order: true,
+        };
+        timeline.push(posttest_likert);
+
+        //PLEASE KEEP FOR ALL FUTURE ITERATIONS
+        //this portion of the code ensures that the data gets sent to be stored on OSF
+        var participant_survey = {
+            type: jsPsychSurveyText,
+            questions: [
+                { prompt: 'What do you think this experiment was about?' },
+                { prompt: 'Did you encounter any technical issues?' },
+                { prompt: 'Was it hard to figure out the puzzles?' },
+            ],
+            on_finish: function (data) {
+                console.log(data);
+            },
+        };
+        timeline.push(participant_survey);
+
+        const save_data = {
+            type: jsPsychPipe,
+            action: 'save',
+            experiment_id: 'wCWH7aO7xiIT',
+            filename: filename,
+            data_string: () => jsPsych.data.get().csv(),
+        };
+        timeline.push(save_data);
+        //PLEASE KEEP FOR ALL FUTURE ITERATIONS
+
+        var debrief = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `
+              <p>Thank you for participating!</p>
+              <p>This experiment was designed to study if peoples motivation changes when learning</p>
+              <p>and listening to different music.</p>
+              <p>Press any key to finish.</p>`,
+        };
+        timeline.push(debrief);
+
+        /* start the experiment */
+        jsPsych.run(timeline);
+    </script>
 </html>
