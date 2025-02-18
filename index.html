@@ -3,19 +3,21 @@
     <head>
         <title>SL Experiment</title>
         <script src="https://unpkg.com/jspsych@8.0.0"></script>
-        <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.0.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey@2.1.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.1.0"></script>
-        <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
-        <script src="https://unpkg.com/@jspsych/plugin-audio-keyboard-response@2.1.0"></script>
         <link
             href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css"
             rel="stylesheet"
             type="text/css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/@jspsych/plugin-survey@2.1.0/css/survey.css"
         />
         <!-- This is for data storage - please be sure to keep this script in all future updates to the code!! -->
         <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
@@ -79,71 +81,177 @@
         });
 
         // Create timeline
-        var timeline = [];
+        const timeline = [];
 
         // Fullscreen
-        var enter_fullscreen = {
+        const enter_fullscreen = {
             type: jsPsychFullscreen,
             fullscreen_mode: true,
         };
         timeline.push(enter_fullscreen);
 
-        // Welcome trial
-        var welcome = {
-            type: jsPsychHtmlKeyboardResponse,
-            stimulus: 'Welcome to the experiment! Press any key to continue.',
-        };
-        timeline.push(welcome);
-
         // Instructions trial
-        var instructions = {
-            type: jsPsychHtmlKeyboardResponse,
+        const instructions = {
+            type: jsPsychHtmlButtonResponse,
             stimulus: `
-              <p>In this experiment, you will see a list of words and try to remember as many as possible.</p>
-              <p>Afterward, you will be asked to recall them. Later, you will see another list and do the same.</p>
-              <p>There will also be a delayed recall test at the end as well as a couple surveys.</p>
-              <p>Press any key to begin.</p>`,
+              <h2>Welcome!</h2>
+              <p><strong>Please read the following instructions:</strong></p>
+              <p> In this study, you will complete a baseline evaluation about yourself and your music habits, genre preferences, study routines, and motivation levels.</p>
+              <p>Afterward, you will be shown a series of words in the center of your screen. Please pay close attention and try to remember as many words as possible.</p>
+              <p>Next, you will be asked to recall the words you saw. Later, you will see a new list and repeat the process.</p>
+              <p>At the end of the study, there will be a delayed recall test to assess your retention.</p>
+              <p>Stay focused and do your best!`,
+            choices: ['Continue'],
         };
         timeline.push(instructions);
 
-        var likert_scale = [
-            'Strongly Disagree',
-            'Disagree',
-            'Neutral',
-            'Agree',
-            'Strongly Agree',
-        ];
-
-        // Baseline evaluation
-        var pretest_likert = {
-            type: jsPsychSurveyLikert,
-            questions: [
-                {
-                    prompt: 'I would like to learn something new today',
-                    name: 'Experiment',
-                    labels: likert_scale,
-                },
-                {
-                    prompt: 'I enjoy listening to music while I study',
-                    name: 'Study',
-                    labels: likert_scale,
-                },
-                {
-                    prompt: 'I listen to music consistently throughout the day',
-                    name: 'Music',
-                    labels: likert_scale,
-                },
-            ],
-            randomize_question_order: true,
+        // ✏️ Baseline evaluation
+        const baseline_evaluation = {
+            type: jsPsychSurvey,
+            survey_json: {
+                showQuestionNumbers: false,
+                title: 'Baseline Evaluation',
+                pages: [
+                    {
+                        elements: [
+                            {
+                                type: 'text',
+                                name: 'baseline-age',
+                                title: 'How old are you?',
+                                maskType: 'numeric',
+                                isRequired: true,
+                            },
+                            {
+                                type: 'radiogroup',
+                                title: 'What is your race or ethnicity?',
+                                name: 'baseline-race',
+                                choices: [
+                                    'American Indian or Alaska Native',
+                                    'Asian',
+                                    'Black or African American',
+                                    'Hispanic or Latino',
+                                    'Native Hawaiian or Other Pacific Islander',
+                                    'White',
+                                    'I prefer not to answer',
+                                ],
+                                isRequired: true,
+                            },
+                        ],
+                    },
+                    {
+                        elements: [
+                            {
+                                type: 'radiogroup',
+                                title: 'How often do you listen to music while studying?',
+                                name: 'baseline-listen-frequency',
+                                choices: [
+                                    'Always',
+                                    'Occasionally',
+                                    'Sometimes',
+                                    'Never',
+                                ],
+                                isRequired: true,
+                            },
+                            {
+                                type: 'radiogroup',
+                                title: 'How do you typically listen to music while studying?',
+                                name: 'baseline-listening-device',
+                                choices: [
+                                    'Earbuds',
+                                    'Over ear headphones',
+                                    'Speakers/Out loud',
+                                    `I don't listen to music when studying`,
+                                ],
+                                isRequired: true,
+                            },
+                            {
+                                type: 'checkbox',
+                                title: 'What type(s) of music do you typically listen to while studying?',
+                                name: 'baseline-music-type',
+                                description: 'Select as many as you want.',
+                                choices: [
+                                    'Classical',
+                                    'Jazz',
+                                    'Lo-fi / Chillhop',
+                                    'Ambient / New Age',
+                                    'Pop',
+                                    'Rock',
+                                    'R&B / Soul',
+                                    'Hip-Hop / Rap',
+                                    'Electronic / EDM',
+                                    'Reggae',
+                                    'Latin / Reggaeton',
+                                    'K-Pop / J-Pop',
+                                    'Nature Sounds / White Noise',
+                                    'Podcasts / Spoken Word',
+                                ],
+                                showOtherItem: true,
+                                showNoneItem: true,
+                                isRequired: true,
+                            },
+                        ],
+                    },
+                    {
+                        elements: [
+                            {
+                                type: 'radiogroup',
+                                title: 'How many hours a week do you typically study?',
+                                name: 'baseline-study-hours',
+                                choices: [
+                                    '0-1',
+                                    '2-3',
+                                    '4-5',
+                                    '6-7',
+                                    '8-9',
+                                    '10+',
+                                ],
+                                isRequired: true,
+                            },
+                            {
+                                type: 'checkbox',
+                                title: 'Where do you usually study?',
+                                name: 'baseline-study-location',
+                                description: 'Select as many as you want.',
+                                choices: ['Coffee shop', 'Home', 'Library'],
+                                showOtherItem: true,
+                                showNoneItem: true,
+                                isRequired: true,
+                            },
+                            {
+                                type: 'rating',
+                                name: 'baseline-study-motivation',
+                                title: 'How motivated do you typically feel while studying?',
+                                minRateDescription: 'Not at all',
+                                maxRateDescription: 'Extremely',
+                                rateCount: 10,
+                                rateMax: 10,
+                                isRequired: true,
+                            },
+                        ],
+                    },
+                ],
+            },
         };
-        timeline.push(pretest_likert);
+        timeline.push(baseline_evaluation);
 
-        // Audio settings test trial
-        var audio_test = {
+        // ➡️ Transition to learning trials
+        const baseline_transition = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `<h2>Thank you!</h2>
+          <p>Your baseline evaluation has been recorded.</p>
+          <p><strong>You will now proceed to the learning task.</strong></p>`,
+            choices: 'NO_KEYS',
+            trial_duration: 3000,
+        };
+        timeline.push(baseline_transition);
+
+        // 🎵 Audio settings test trial
+        const audio_test = {
             type: jsPsychHtmlButtonResponse,
             on_load: addVolumeChangeEvent,
             stimulus: `
-              <p>Before continuing, please adjust your volume setting using the player below.</p>
+              <h2>Adjust your volume</h2>
+              <p>Before continuing, please adjust your volume using the audio player below.</p>
               <div><audio id="audio_test" controls controlsList = "noplaybackrate nodownload" src="audio/test.wav"></audio></div>
             `,
             choices: ['Continue'],
@@ -177,7 +285,7 @@
             return trials;
         }
 
-        // ⭐ Add a start trial screen to load music for the trial ⭐
+        // ⭐ Trial to load audio ⭐
         var start_trial_audio = {
             type: jsPsychHtmlKeyboardResponse,
             choices: 'NO_KEYS',
@@ -186,7 +294,7 @@
                 loadAudio();
             },
             stimulus: `<p>This will load the audio for the trial.</p>
-                <p><strong>The trial will begin in 5 seconds.<strong></p>`,
+              <p><strong>The trial will begin in 5 seconds.<strong></p>`,
             trial_duration: 5000,
         };
         // ⭐ Add a start trial screen to change audio⭐
@@ -301,46 +409,89 @@
         }));
         timeline.push(...recognition_trials);
 
-        // Reflection survey
-        var posttest_likert = {
-            type: jsPsychSurveyLikert,
-            on_start: stopAudio,
-            questions: [
-                {
-                    prompt: 'I felt like the lofi helped me focus',
-                    name: 'lofi',
-                    labels: likert_scale,
-                },
-                {
-                    prompt: 'I enjoyed listening to music while I did the experiment',
-                    name: 'Enjoyment',
-                    labels: likert_scale,
-                },
-                {
-                    prompt: 'I felt more motivated to try when listening to music',
-                    name: 'Motive',
-                    labels: likert_scale,
-                },
-            ],
-            randomize_question_order: true,
-        };
-        timeline.push(posttest_likert);
-
-        //PLEASE KEEP FOR ALL FUTURE ITERATIONS
-        //this portion of the code ensures that the data gets sent to be stored on OSF
-        var participant_survey = {
-            type: jsPsychSurveyText,
-            questions: [
-                { prompt: 'What do you think this experiment was about?' },
-                { prompt: 'Did you encounter any technical issues?' },
-                { prompt: 'Was it hard to figure out the puzzles?' },
-            ],
+        // ✏️ Reflection survey
+        var reflection_survey = {
+            type: jsPsychSurvey,
+            survey_json: {
+                showQuestionNumbers: false,
+                title: 'Reflection Survey',
+                pages: [
+                    {
+                        elements: [
+                            {
+                                type: 'rating',
+                                name: 'reflect-study-mood',
+                                title: 'How did you feel while completing this study?',
+                                rateType: 'smileys',
+                                rateCount: 10,
+                                rateMax: 10,
+                                scaleColorMode: 'colored',
+                                isRequired: true,
+                            },
+                            {
+                                type: 'rating',
+                                name: 'reflect-study-motivation',
+                                title: 'How motivated did you feel during this study?',
+                                minRateDescription: 'Not at all',
+                                maxRateDescription: 'Extremely',
+                                rateCount: 10,
+                                rateMax: 10,
+                                isRequired: true,
+                            },
+                        ],
+                    },
+                    {
+                        elements: [
+                            {
+                                type: 'radiogroup',
+                                title: 'How listening device did you use during this study?',
+                                name: 'reflect-listening-device',
+                                choices: [
+                                    'Earbuds',
+                                    'Over ear headphones',
+                                    'Speakers/Out loud',
+                                ],
+                                isRequired: true,
+                            },
+                            {
+                                type: 'radiogroup',
+                                title: 'Have you heard the songs in this experiment before?',
+                                name: 'reflect-music-familiarity',
+                                choices: [
+                                    'One of them',
+                                    'Both of them',
+                                    'Neither',
+                                    `They sound familiar, but I'm unsure`,
+                                ],
+                                isRequired: true,
+                            },
+                            {
+                                type: 'radiogroup',
+                                title: 'How did you feel about the music played?',
+                                name: 'reflect-music-opinion',
+                                choices: [
+                                    `I liked it, but I wouldn't use it for studying`,
+                                    'I liked it and would use it for studying',
+                                    `I didn't like the music used`,
+                                ],
+                                isRequired: true,
+                            },
+                            {
+                                type: 'comment',
+                                title: 'If you liked the music, did you like one track or both? Which one(s)?',
+                                name: 'reflect-music-likes',
+                            },
+                        ],
+                    },
+                ],
+            },
             on_finish: function (data) {
                 console.log(data);
             },
         };
-        timeline.push(participant_survey);
+        timeline.push(reflection_survey);
 
+        // 💾 Save data
         const save_data = {
             type: jsPsychPipe,
             action: 'save',
@@ -349,8 +500,8 @@
             data_string: () => jsPsych.data.get().csv(),
         };
         timeline.push(save_data);
-        //PLEASE KEEP FOR ALL FUTURE ITERATIONS
 
+        // Debrief
         var debrief = {
             type: jsPsychHtmlKeyboardResponse,
             stimulus: `
