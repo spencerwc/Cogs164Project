@@ -8,8 +8,8 @@
         <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey@2.1.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
-        <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.1.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-external-html@2.1.0"></script>
         <link
             href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css"
             rel="stylesheet"
@@ -90,6 +90,29 @@
         };
         timeline.push(enter_fullscreen);
 
+        // Consent to participate
+        const check_consent = function (elem) {
+            if (document.getElementById('consent_checkbox').checked) {
+                return true;
+            } else {
+                alert(
+                    "If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'"
+                );
+                return false;
+            }
+            return false;
+        };
+
+        // Consent trial
+        const consent_trial = {
+            type: jsPsychExternalHtml,
+            url: 'consent.html',
+            cont_btn: 'start',
+            check_fn: check_consent,
+        };
+
+        timeline.push(consent_trial);
+
         // Instructions trial
         const instructions = {
             type: jsPsychHtmlButtonResponse,
@@ -132,6 +155,7 @@
                                     'Hispanic or Latino',
                                     'Native Hawaiian or Other Pacific Islander',
                                     'White',
+                                    'Other',
                                     'I prefer not to answer',
                                 ],
                                 isRequired: true,
@@ -146,7 +170,7 @@
                                 name: 'baseline-listen-frequency',
                                 choices: [
                                     'Always',
-                                    'Occasionally',
+                                    'Often',
                                     'Sometimes',
                                     'Never',
                                 ],
