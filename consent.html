@@ -1,11 +1,47 @@
-<div id="consent">
-    <p>
-        This is a demo experiment, with this minimal consent form included. To
-        continue, click the checkbox below and hit "Start Experiment".
-    </p>
-    <p>
-        <input type="checkbox" id="consent_checkbox" />
-        I agree to take part in this study.
-    </p>
-    <button type="button" id="start">Start Experiment</button>
-</div>
+<head>
+    <style>
+        button {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0.75em;
+            font-size: 14px;
+            font-weight: 400;
+            font-family: 'Open Sans', 'Arial', sans-serif;
+            cursor: pointer;
+            line-height: 1.4;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            background-image: none;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #333;
+            background-color: #fff;
+            border-color: #ccc;
+        }
+        input[type='checkbox'] {
+            zoom: 1.5;
+        }
+        #consent_container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="consent">
+        <p>
+            This is a demo experiment, with this minimal consent form included.
+            To continue, click the checkbox below and hit "Start Experiment".
+        </p>
+        <p>
+            <label id="consent_container">
+                <input type="checkbox" id="consent_checkbox" />
+                <strong>I agree to take part in this study</strong>
+            </label>
+        </p>
+        <button type="button" id="start">Start Experiment</button>
+    </div>
+</body>

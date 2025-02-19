@@ -8,7 +8,6 @@
         <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey@2.1.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
-        <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.1.0"></script>
         <script src="https://unpkg.com/@jspsych/plugin-external-html@2.1.0"></script>
         <link
             href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css"
@@ -142,22 +141,27 @@
                                 name: 'baseline-age',
                                 title: 'How old are you?',
                                 maskType: 'numeric',
+                                min: 0,
+                                max: 110,
                                 isRequired: true,
                             },
                             {
-                                type: 'radiogroup',
+                                type: 'checkbox',
                                 title: 'What is your race or ethnicity?',
+                                description: 'Select all that apply.',
                                 name: 'baseline-race',
                                 choices: [
                                     'American Indian or Alaska Native',
                                     'Asian',
                                     'Black or African American',
-                                    'Hispanic or Latino',
+                                    'Hispanic, Latino, or Spanish Origin',
+                                    'Middle Eastern or North African',
                                     'Native Hawaiian or Other Pacific Islander',
                                     'White',
-                                    'Other',
-                                    'I prefer not to answer',
+                                    'Multiethnic',
                                 ],
+                                showOtherItem: true,
+                                showRefuseItem: true,
                                 isRequired: true,
                             },
                         ],
@@ -192,7 +196,7 @@
                                 type: 'checkbox',
                                 title: 'What type(s) of music do you typically listen to while studying?',
                                 name: 'baseline-music-type',
-                                description: 'Select as many as you want.',
+                                description: 'Select all that apply.',
                                 choices: [
                                     'Classical',
                                     'Jazz',
@@ -262,8 +266,8 @@
         const baseline_transition = {
             type: jsPsychHtmlKeyboardResponse,
             stimulus: `<h2>Thank you!</h2>
-          <p>Your baseline evaluation has been recorded.</p>
-          <p><strong>You will now proceed to the learning task.</strong></p>`,
+          <p>Your baseline evaluation responses have been recorded.</p>
+          <p><strong>You will now be taken to the learning task.</strong></p>`,
             choices: 'NO_KEYS',
             trial_duration: 3000,
         };
@@ -527,14 +531,20 @@
 
         // Debrief
         var debrief = {
-            type: jsPsychHtmlKeyboardResponse,
+            type: jsPsychHtmlButtonResponse,
             stimulus: `
-              <p>Thank you for participating!</p>
+              <h2>Thank you!</h2>
               <p>This experiment was designed to study if peoples motivation changes when learning</p>
-              <p>and listening to different music.</p>
-              <p>Press any key to finish.</p>`,
+              <p>and listening to different music.</p>`,
+            choises: ['Finish'],
         };
         timeline.push(debrief);
+
+        const exit_fullscreen = {
+            type: jsPsychFullscreen,
+            fullscreen_mode: false,
+            delay_after: 0,
+        };
 
         // Start the experiment
         jsPsych.run(timeline);
