@@ -266,9 +266,11 @@
         // ➡️ Transition to learning trials
         const baseline_transition = {
             type: jsPsychHtmlKeyboardResponse,
-            stimulus: `<h2>Thank you!</h2>
-          <p>Your baseline evaluation responses have been recorded.</p>
-          <p><strong>You will now be taken to the learning task.</strong></p>`,
+            stimulus: `
+                <h2>Thank you!</h2>
+                <p>Your baseline evaluation responses have been recorded.</p>
+                <p><strong>You will now be taken to the learning task.</strong></p>
+            `,
             choices: 'NO_KEYS',
             trial_duration: 3000,
         };
@@ -279,9 +281,9 @@
             type: jsPsychHtmlButtonResponse,
             on_load: addVolumeChangeEvent,
             stimulus: `
-              <h2>Adjust your volume</h2>
-              <p>Before continuing, please adjust your volume using the audio player below.</p>
-              <div><audio id="audio_test" controls controlsList = "noplaybackrate nodownload" src="audio/test.wav"></audio></div>
+                <h2>Adjust your volume</h2>
+                <p>Before continuing, please adjust your volume using the audio player below.</p>
+                <div><audio id="audio_test" controls controlsList = "noplaybackrate nodownload" src="audio/test.wav"></audio></div>
             `,
             choices: ['Continue'],
         };
@@ -314,64 +316,97 @@
             return trials;
         }
 
-        // Trial to load audio
-        var start_trial_audio = {
-            type: jsPsychHtmlKeyboardResponse,
-            choices: 'NO_KEYS',
-            on_start: function () {
-                stopAudio();
-                loadAudio();
-            },
-            stimulus: `<p>This will load the audio for the trial.</p>
-              <p><strong>The trial will begin in 5 seconds.<strong></p>`,
-            trial_duration: 5000,
-        };
-        //  Add a start trial screen to change audio
-        timeline.push(start_trial_audio);
-
         // Define the three conditions
-    var conditions = [
-    { music: 'instrumental.mp3', words: ['apple', 'table', 'dog', 'sun', 'chair', 'pencil', 'river', 'moon', 'house', 'flower'] },
-    { music: 'vocal.mp3', words: ['phone', 'candle', 'ocean', 'guitar', 'mouse', 'book', 'lamp', 'bridge', 'mountain', 'car'] },
-    { music: 'silence', words: ['tree', 'window', 'cloud', 'star', 'computer', 'train', 'guitar', 'sand', 'cup', 'door'] }
-    ];
+        let conditions = [
+            {
+                music: 'instrumental.mp3',
+                words: [
+                    'apple',
+                    'table',
+                    'dog',
+                    'sun',
+                    'chair',
+                    'pencil',
+                    'river',
+                    'moon',
+                    'house',
+                    'flower',
+                ],
+            },
+            {
+                music: 'vocal.mp3',
+                words: [
+                    'phone',
+                    'candle',
+                    'ocean',
+                    'guitar',
+                    'mouse',
+                    'book',
+                    'lamp',
+                    'bridge',
+                    'mountain',
+                    'car',
+                ],
+            },
+            {
+                music: 'silence',
+                words: [
+                    'tree',
+                    'window',
+                    'cloud',
+                    'star',
+                    'computer',
+                    'train',
+                    'guitar',
+                    'sand',
+                    'cup',
+                    'door',
+                ],
+            },
+        ];
 
-    conditions = jsPsych.randomization.shuffle(conditions);
+        conditions = jsPsych.randomization.shuffle(conditions);
 
-    conditions.forEach((condition, index) => {
-    // Load the appropriate audio
-    let start_trial_audio = {
-        type: jsPsychHtmlKeyboardResponse,
-        choices: 'NO_KEYS',
-        on_start: function () {
-            stopAudio();
-            if (condition.music !== 'silence') {
-                audio.src = `audio/${condition.music}`;
-                audio.play();
-            }
-        },
-        stimulus: `<p>Starting Trial ${index + 1}.</p>
+        conditions.forEach((condition, index) => {
+            // Load the appropriate audio
+            const start_trial_audio = {
+                type: jsPsychHtmlKeyboardResponse,
+                choices: 'NO_KEYS',
+                on_start: function () {
+                    stopAudio();
+                    if (condition.music !== 'silence') {
+                        audio.src = `audio/${condition.music}`;
+                        audio.play();
+                    }
+                },
+                stimulus: `<p>Starting Trial ${index + 1}.</p>
                   <p><strong>The trial will begin in 5 seconds.</strong></p>`,
-        trial_duration: 5000,
-    };
-    timeline.push(start_trial_audio);
+                trial_duration: 5000,
+            };
+            timeline.push(start_trial_audio);
 
-    // Present words for the condition
-    timeline.push(...create_word_trials(condition.words, `encoding_${index}`));
+            // Present words for the condition
+            timeline.push(
+                ...create_word_trials(condition.words, `encoding_${index}`)
+            );
 
-    // Immediate recall task
-    let recall_trial = {
-        type: jsPsychSurveyText,
-        questions: [
-            { prompt: 'List all the words you remember:', rows: 5, columns: 40 }
-        ],
-        data: { phase: `immediate_recall_${index}` },
-    };
-    timeline.push(recall_trial);
-});
+            // Immediate recall task
+            const recall_trial = {
+                type: jsPsychSurveyText,
+                questions: [
+                    {
+                        prompt: 'List all the words you remember:',
+                        rows: 5,
+                        columns: 40,
+                    },
+                ],
+                data: { phase: `immediate_recall_${index}` },
+                on_finish: stopAudio, // TODO: CHANGE LATER 👈
+            };
+            timeline.push(recall_trial);
+        });
 
-
-        var math_problems = [
+        const math_problems = [
             {
                 question: '8 × 3 = ?',
                 choices: ['21', '24', '26', '28'],
@@ -406,7 +441,7 @@
         });
 
         // Delayed Recall (After Interference)
-        var delayed_recall = {
+        const delayed_recall = {
             type: jsPsychSurveyText,
             questions: [
                 {
@@ -418,15 +453,24 @@
         };
         timeline.push(delayed_recall);
 
+        // Get all condition words
+        let condition_words = conditions.flatMap(
+            (condition) => condition.words
+        );
+
         // Recognition Test (Mix of Old and New Words)
-        var all_words = jsPsych.randomization.shuffle([
-            ...'instrumental.mp3',
-            ...'vocal.mp3',
+        let all_words = jsPsych.randomization.shuffle([
+            ...condition_words,
             'tree',
             'window',
             'cloud',
         ]);
-        var recognition_trials = all_words.map((word) => ({
+
+        // Shorten word list for recognition trials
+        const recognition_words = all_words.slice(0, 15);
+
+        // Map recognition words to trials
+        const recognition_trials = recognition_words.map((word) => ({
             type: jsPsychHtmlButtonResponse,
             stimulus: `<p>Did you see this word in the FIRST list?</p><p><strong>${word}</strong></p>`,
             choices: ['Yes', 'No'],
@@ -515,19 +559,18 @@
         };
         timeline.push(reflection_survey);
 
-       // 💾 Save data
-const save_data = {
-    type: jsPsychPipe,
-    action: 'save',
-    experiment_id: 'wCWH7aO7xiIT',
-    filename: filename,
-    data_string: () => jsPsych.data.get().csv(),
-    version: '1.0.0',  // Add the version field
-    data: { phase: 'data_save' },  // Add the data field
-};
+        // 💾 Save data
+        const save_data = {
+            type: jsPsychPipe,
+            action: 'save',
+            experiment_id: 'wCWH7aO7xiIT',
+            filename: filename,
+            data_string: () => jsPsych.data.get().csv(),
+            version: '1.0.0', // Add the version field
+            data: { phase: 'data_save' }, // Add the data field
+        };
 
-timeline.push(save_data);
-
+        timeline.push(save_data);
 
         // Debrief
         var debrief = {
@@ -536,7 +579,7 @@ timeline.push(save_data);
               <h2>Thank you!</h2>
               <p>This experiment was designed to study if peoples motivation changes when learning</p>
               <p>and listening to different music.</p>`,
-            choises: ['Finish'],
+            choices: ['Finish'],
         };
         timeline.push(debrief);
 
@@ -545,6 +588,7 @@ timeline.push(save_data);
             fullscreen_mode: false,
             delay_after: 0,
         };
+        timeline.push(exit_fullscreen);
 
         // Start the experiment
         jsPsych.run(timeline);
