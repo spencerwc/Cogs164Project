@@ -65,6 +65,7 @@
         // Initialize jsPsych
         var jsPsych = initJsPsych({
             show_progress_bar: true,
+            override_safe_mode: true,
         });
 
         // PLEASE KEEP FOR ALL FUTURE ITERATIONS
@@ -313,7 +314,7 @@
             return trials;
         }
 
-        // ⭐ Trial to load audio ⭐
+        // Trial to load audio
         var start_trial_audio = {
             type: jsPsychHtmlKeyboardResponse,
             choices: 'NO_KEYS',
@@ -325,55 +326,50 @@
               <p><strong>The trial will begin in 5 seconds.<strong></p>`,
             trial_duration: 5000,
         };
-        // ⭐ Add a start trial screen to change audio⭐
+        //  Add a start trial screen to change audio
         timeline.push(start_trial_audio);
 
-        // Encoding Phase (List A)
-        var word_list_A = [
-            'apple',
-            'table',
-            'dog',
-            'sun',
-            'chair',
-            'pencil',
-            'river',
-            'moon',
-            'house',
-            'flower',
-        ];
-        timeline.push(...create_word_trials(word_list_A, 'encoding'));
+        // Define the three conditions
+    var conditions = [
+    { music: 'instrumental.mp3', words: ['apple', 'table', 'dog', 'sun', 'chair', 'pencil', 'river', 'moon', 'house', 'flower'] },
+    { music: 'vocal.mp3', words: ['phone', 'candle', 'ocean', 'guitar', 'mouse', 'book', 'lamp', 'bridge', 'mountain', 'car'] },
+    { music: 'silence', words: ['tree', 'window', 'cloud', 'star', 'computer', 'train', 'guitar', 'sand', 'cup', 'door'] }
+    ];
 
-        // Immediate Recall (Participants Type Words)
-        var immediate_recall = {
-            type: jsPsychSurveyText,
-            questions: [
-                {
-                    prompt: 'List all the words you remember:',
-                    rows: 5,
-                    columns: 40,
-                },
-            ],
-            data: { phase: 'immediate_recall' },
-        };
-        timeline.push(immediate_recall);
+    conditions = jsPsych.randomization.shuffle(conditions);
 
-        // ⭐ Add a start trial screen to change audio⭐
-        timeline.push(start_trial_audio);
+    conditions.forEach((condition, index) => {
+    // Load the appropriate audio
+    let start_trial_audio = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: 'NO_KEYS',
+        on_start: function () {
+            stopAudio();
+            if (condition.music !== 'silence') {
+                audio.src = `audio/${condition.music}`;
+                audio.play();
+            }
+        },
+        stimulus: `<p>Starting Trial ${index + 1}.</p>
+                  <p><strong>The trial will begin in 5 seconds.</strong></p>`,
+        trial_duration: 5000,
+    };
+    timeline.push(start_trial_audio);
 
-        // Interference List (New Word List B)
-        var word_list_B = [
-            'phone',
-            'candle',
-            'ocean',
-            'guitar',
-            'mouse',
-            'book',
-            'lamp',
-            'bridge',
-            'mountain',
-            'car',
-        ];
-        timeline.push(...create_word_trials(word_list_B, 'interference'));
+    // Present words for the condition
+    timeline.push(...create_word_trials(condition.words, `encoding_${index}`));
+
+    // Immediate recall task
+    let recall_trial = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'List all the words you remember:', rows: 5, columns: 40 }
+        ],
+        data: { phase: `immediate_recall_${index}` },
+    };
+    timeline.push(recall_trial);
+});
+
 
         var math_problems = [
             {
@@ -424,8 +420,8 @@
 
         // Recognition Test (Mix of Old and New Words)
         var all_words = jsPsych.randomization.shuffle([
-            ...word_list_A,
-            ...word_list_B,
+            ...'instrumental.mp3',
+            ...'vocal.mp3',
             'tree',
             'window',
             'cloud',
@@ -519,15 +515,19 @@
         };
         timeline.push(reflection_survey);
 
-        // 💾 Save data
-        const save_data = {
-            type: jsPsychPipe,
-            action: 'save',
-            experiment_id: 'wCWH7aO7xiIT',
-            filename: filename,
-            data_string: () => jsPsych.data.get().csv(),
-        };
-        timeline.push(save_data);
+       // 💾 Save data
+const save_data = {
+    type: jsPsychPipe,
+    action: 'save',
+    experiment_id: 'wCWH7aO7xiIT',
+    filename: filename,
+    data_string: () => jsPsych.data.get().csv(),
+    version: '1.0.0',  // Add the version field
+    data: { phase: 'data_save' },  // Add the data field
+};
+
+timeline.push(save_data);
+
 
         // Debrief
         var debrief = {
