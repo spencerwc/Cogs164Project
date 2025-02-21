@@ -30,9 +30,6 @@
         // Set up audio helper functions
         const audio = document.getElementById('audio');
 
-        // Track options
-        const audioTracks = ['instrumental.mp3', 'vocal.mp3'];
-
         // Add volume change listener to audio test to save ideal volume settings
         function addVolumeChangeEvent() {
             const audio_test = document.getElementById('audio_test');
@@ -41,25 +38,13 @@
             });
         }
 
-        // Randomly pick a track and remove it from the array
-        function pickRandomTrack() {
-            if (audioTracks.length === 0) {
-                return null;
-            }
-            let index = Math.floor(Math.random() * audioTracks.length);
-            return audioTracks.splice(index, 1)[0];
-        }
-
-        // Load trial audio
-        function loadAudio() {
-            const track = pickRandomTrack();
-            audio.src = `audio/${track}`;
-            audio.play();
-        }
-
-        // Stop trial audio
-        function stopAudio() {
+        function loadAudio(music) {
             audio.pause();
+
+            if (music !== 'silence') {
+                audio.src = `audio/${music}.mp3`;
+                audio.play();
+            }
         }
 
         // Initialize jsPsych
@@ -110,7 +95,6 @@
             cont_btn: 'start',
             check_fn: check_consent,
         };
-
         timeline.push(consent_trial);
 
         // Instructions trial
@@ -128,7 +112,7 @@
         };
         timeline.push(instructions);
 
-        // ✏️ Baseline evaluation
+        // Baseline evaluation
         const baseline_evaluation = {
             type: jsPsychSurvey,
             survey_json: {
@@ -263,7 +247,7 @@
         };
         timeline.push(baseline_evaluation);
 
-        // ➡️ Transition to learning trials
+        // Transition to learning trials
         const baseline_transition = {
             type: jsPsychHtmlKeyboardResponse,
             stimulus: `
@@ -276,7 +260,7 @@
         };
         timeline.push(baseline_transition);
 
-        // 🎵 Audio settings test trial
+        // Audio settings test trial
         const audio_test = {
             type: jsPsychHtmlButtonResponse,
             on_load: addVolumeChangeEvent,
@@ -289,11 +273,61 @@
         };
         timeline.push(audio_test);
 
+        function create_audio_start_trial(music) {
+            const start_trial_audio = {
+                type: jsPsychHtmlKeyboardResponse,
+                choices: 'NO_KEYS',
+                on_start: function () {
+                    loadAudio(music);
+                },
+                stimulus: `<p>Starting trial with ${
+                    (music !== 'silence' && `${music} music`) || 'silence'
+                }.</p>
+                  <p><strong>The trial will begin in 5 seconds.</strong></p>`,
+                trial_duration: 5000,
+            };
+
+            return start_trial_audio;
+        }
+
+        // Define balanced word banks
+        // prettier-ignore
+        const word_banks = [
+            [
+                "apple", "table", "dog", "sun", "chair",
+                "pencil", "river", "moon", "house", "flower",
+                "bridge", "stone", "forest", "cloud", "pathway"
+            ],
+            [
+                "phone", "candle", "ocean", "guitar", "mouse",
+                "book", "lamp", "valley", "mountain", "car",
+                "mirror", "radio", "harbor", "road", "journal"
+            ],
+            [
+                "tree", "window", "cloud", "star", "computer",
+                "train", "guitar", "desert", "cup", "door",
+                "ceiling", "desk", "keyboard", "horizon", "stream"
+            ]
+        ];
+
+        // Function to get random word bank and track options
+        function get_word_bank() {
+            if (word_banks.length === 0) {
+                return console.warn('All words have been used!'); // Debugging
+            }
+
+            // Randomly select a word bank and remove
+            let bank_index = Math.floor(Math.random() * word_banks.length);
+            let selected_bank = word_banks.splice(bank_index, 1)[0];
+
+            return selected_bank;
+        }
+
         // Function to present words with fixation cross
-        function create_word_trials(word_list, label) {
+        function create_word_trials(word_bank, label) {
             let trials = [];
 
-            word_list.forEach((word) => {
+            word_bank.forEach((word) => {
                 // Fixation cross trial
                 trials.push({
                     type: jsPsychHtmlKeyboardResponse,
@@ -316,81 +350,48 @@
             return trials;
         }
 
-        // Define the three conditions
-        let conditions = [
-            {
-                music: 'instrumental.mp3',
-                words: [
-                    'apple',
-                    'table',
-                    'dog',
-                    'sun',
-                    'chair',
-                    'pencil',
-                    'river',
-                    'moon',
-                    'house',
-                    'flower',
-                ],
-            },
-            {
-                music: 'vocal.mp3',
-                words: [
-                    'phone',
-                    'candle',
-                    'ocean',
-                    'guitar',
-                    'mouse',
-                    'book',
-                    'lamp',
-                    'bridge',
-                    'mountain',
-                    'car',
-                ],
-            },
-            {
-                music: 'silence',
-                words: [
-                    'tree',
-                    'window',
-                    'cloud',
-                    'star',
-                    'computer',
-                    'train',
-                    'guitar',
-                    'sand',
-                    'cup',
-                    'door',
-                ],
-            },
-        ];
-
-        conditions = jsPsych.randomization.shuffle(conditions);
-
-        conditions.forEach((condition, index) => {
-            // Load the appropriate audio
-            const start_trial_audio = {
-                type: jsPsychHtmlKeyboardResponse,
-                choices: 'NO_KEYS',
-                on_start: function () {
-                    stopAudio();
-                    if (condition.music !== 'silence') {
-                        audio.src = `audio/${condition.music}`;
-                        audio.play();
-                    }
+        // Function to create distractor trials with math problems
+        function create_distractor_trials() {
+            const math_problems = [
+                {
+                    question: '8 × 3 = ?',
+                    choices: ['21', '24', '26', '28'],
+                    correct_index: 1,
                 },
-                stimulus: `<p>Starting Trial ${index + 1}.</p>
-                  <p><strong>The trial will begin in 5 seconds.</strong></p>`,
-                trial_duration: 5000,
-            };
-            timeline.push(start_trial_audio);
+                {
+                    question: '15 - 9 = ?',
+                    choices: ['5', '6', '7', '8'],
+                    correct_index: 1,
+                },
+                {
+                    question: '25 ÷ 5 = ?',
+                    choices: ['4', '5', '6', '7'],
+                    correct_index: 1,
+                },
+            ];
 
-            // Present words for the condition
-            timeline.push(
-                ...create_word_trials(condition.words, `encoding_${index}`)
-            );
+            // Generate trials
+            const distractor_trials = [];
+            math_problems.forEach((problem) => {
+                distractor_trials.push({
+                    type: jsPsychHtmlButtonResponse,
+                    stimulus: `<p>${problem.question}</p>`,
+                    choices: problem.choices,
+                    data: {
+                        phase: `math_distractor`,
+                        correct_choice: problem.correct_index,
+                    },
+                    on_finish: function (data) {
+                        data.correct = data.response === problem.correct_index;
+                    },
+                });
+            });
 
-            // Immediate recall task
+            return distractor_trials;
+        }
+
+        // Creates a new recall trial
+        function create_recall_trial(label) {
             const recall_trial = {
                 type: jsPsychSurveyText,
                 questions: [
@@ -400,85 +401,37 @@
                         columns: 40,
                     },
                 ],
-                data: { phase: `immediate_recall_${index}` },
-                on_finish: stopAudio, // TODO: CHANGE LATER 👈
+                data: { phase: `immediate_recall_${label}` },
+                on_finish: audio.pause(), // TODO: CHANGE LATER 👈
             };
+            return recall_trial;
+        }
+
+        // Define music options and shuffle for randomization
+        const music_options = ['instrumental', 'vocal', 'silence'];
+        const trial_music = jsPsych.randomization.shuffle(music_options);
+
+        // Generate a series of trials, distractors, and recalls for each music condition
+        trial_music.forEach((track) => {
+            // Load the appropriate audio
+            const start_trial_audio = create_audio_start_trial(track);
+            timeline.push(start_trial_audio);
+
+            // Present words for the condition
+            const word_bank = get_word_bank();
+            timeline.push(...create_word_trials(word_bank, track));
+
+            // Create distractor trials and add to the timeline
+            const distractor_trials = create_distractor_trials();
+            timeline.push(distractor_trials);
+
+            // Create recall trial and add to the timeline
+            const recall_trial = create_recall_trial(track);
             timeline.push(recall_trial);
         });
 
-        const math_problems = [
-            {
-                question: '8 × 3 = ?',
-                choices: ['21', '24', '26', '28'],
-                correct_index: 1,
-            },
-            {
-                question: '15 - 9 = ?',
-                choices: ['5', '6', '7', '8'],
-                correct_index: 1,
-            },
-            {
-                question: '25 ÷ 5 = ?',
-                choices: ['4', '5', '6', '7'],
-                correct_index: 1,
-            },
-        ];
-
-        // Generate trials
-        math_problems.forEach((problem) => {
-            timeline.push({
-                type: jsPsychHtmlButtonResponse,
-                stimulus: `<p>${problem.question}</p>`,
-                choices: problem.choices,
-                data: {
-                    phase: 'math_distractor',
-                    correct_choice: problem.correct_index,
-                },
-                on_finish: function (data) {
-                    data.correct = data.response === problem.correct_index;
-                },
-            });
-        });
-
-        // Delayed Recall (After Interference)
-        const delayed_recall = {
-            type: jsPsychSurveyText,
-            questions: [
-                {
-                    prompt: 'List all the words you remember from the FIRST list:',
-                    rows: 5,
-                    columns: 40,
-                },
-            ],
-        };
-        timeline.push(delayed_recall);
-
-        // Get all condition words
-        let condition_words = conditions.flatMap(
-            (condition) => condition.words
-        );
-
-        // Recognition Test (Mix of Old and New Words)
-        let all_words = jsPsych.randomization.shuffle([
-            ...condition_words,
-            'tree',
-            'window',
-            'cloud',
-        ]);
-
-        // Shorten word list for recognition trials
-        const recognition_words = all_words.slice(0, 15);
-
-        // Map recognition words to trials
-        const recognition_trials = recognition_words.map((word) => ({
-            type: jsPsychHtmlButtonResponse,
-            stimulus: `<p>Did you see this word in the FIRST list?</p><p><strong>${word}</strong></p>`,
-            choices: ['Yes', 'No'],
-        }));
-        timeline.push(...recognition_trials);
-
-        // ✏️ Reflection survey
-        var reflection_survey = {
+        // Reflection survey
+        const reflection_survey = {
             type: jsPsychSurvey,
             survey_json: {
                 showQuestionNumbers: false,
@@ -553,9 +506,6 @@
                     },
                 ],
             },
-            on_finish: function (data) {
-                console.log(data);
-            },
         };
         timeline.push(reflection_survey);
 
@@ -573,7 +523,7 @@
         timeline.push(save_data);
 
         // Debrief
-        var debrief = {
+        const debrief = {
             type: jsPsychHtmlButtonResponse,
             stimulus: `
               <h2>Thank you!</h2>
