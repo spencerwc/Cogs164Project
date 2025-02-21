@@ -274,7 +274,7 @@
         timeline.push(audio_test);
 
         function create_audio_start_trial(music) {
-            const start_trial_audio = {
+            return {
                 type: jsPsychHtmlKeyboardResponse,
                 choices: 'NO_KEYS',
                 on_start: function () {
@@ -283,11 +283,9 @@
                 stimulus: `<p>Starting trial with ${
                     (music !== 'silence' && `${music} music`) || 'silence'
                 }.</p>
-                  <p><strong>The trial will begin in 5 seconds.</strong></p>`,
+                  <p><strong>The trial will begin in a few seconds.</strong></p>`,
                 trial_duration: 5000,
             };
-
-            return start_trial_audio;
         }
 
         // Define balanced word banks
@@ -310,17 +308,25 @@
             ]
         ];
 
+        // Distractor words for recall task
+        // prettier-ignore
+        const distractor_words = [
+            "backpack", "helmet", "glasses", "wallet", "remote",
+            "pillow", "napkin", "towel", "flashlight", "umbrella",
+            "waterfall", "canyon", "pebble", "prairie", "meadow",
+            "silence", "whisper", "motion", "breeze", "shadow",
+            "thought", "memory", "laughter", "echo", "reflection",
+            "eagle", "rabbit", "turtle", "zebra", "parrot",
+        ];
+
         // Function to get random word bank and track options
         function get_word_bank() {
             if (word_banks.length === 0) {
                 return console.warn('All words have been used!'); // Debugging
             }
-
             // Randomly select a word bank and remove
             let bank_index = Math.floor(Math.random() * word_banks.length);
-            let selected_bank = word_banks.splice(bank_index, 1)[0];
-
-            return selected_bank;
+            return word_banks.splice(bank_index, 1)[0];
         }
 
         // Function to present words with fixation cross
@@ -346,7 +352,6 @@
                     data: { phase: label, type: 'word', word: word },
                 });
             });
-
             return trials;
         }
 
@@ -369,7 +374,7 @@
         ];
 
         // Function to create distractor trials with math problems
-        function create_distractor_trials() {
+        function create_math_distractor_trials() {
             const distractor_trials = [];
 
             math_problems.forEach((problem) => {
@@ -386,25 +391,95 @@
                     },
                 });
             });
-
             return distractor_trials;
         }
 
-        // Creates a new recall trial
-        function create_recall_trial(label) {
-            const recall_trial = {
-                type: jsPsychSurveyText,
-                questions: [
-                    {
-                        prompt: 'List all the words you remember:',
-                        rows: 5,
-                        columns: 40,
-                    },
-                ],
-                data: { phase: `immediate_recall_${label}` },
-                on_finish: audio.pause(), // TODO: CHANGE LATER 👈
+        // Just testing this out as a potential distractor
+        function create_odd_one_out_distractor() {
+            const choices = jsPsych.randomization.shuffle([
+                'lemon',
+                'strawberry',
+                'orange',
+                'balloon',
+            ]);
+
+            return {
+                type: jsPsychHtmlButtonResponse,
+                stimulus: '<p>Which image is the odd one out?</p>',
+                choices: choices,
+                button_html: (choice) =>
+                    `<button class="jspsych-btn"><img src="img/${choice}.png" width="100"></button>`,
+                on_finish: function (data) {
+                    let selectedImage = choices[data.response];
+                    data.correct = selectedImage === 'balloon';
+                    console.log(data);
+                },
             };
-            return recall_trial;
+        }
+
+        // OLD RECALL TRIAL
+        // function create_recall_trial(label) {
+        //     const recall_trial = {
+        //         type: jsPsychSurveyText,
+        //         questions: [
+        //             {
+        //                 prompt: 'List all the words you remember:',
+        //                 rows: 5,
+        //                 columns: 40,
+        //             },
+        //         ],
+        //         data: { phase: `immediate_recall_${label}` }
+        //     };
+        //     return recall_trial;
+        // }
+
+        // Creates a new recall trial using the current word bank
+        function create_recall_trial(word_bank, label) {
+            // Combine word bank with distractor words and shuffle
+            const combined_bank = jsPsych.randomization.shuffle([
+                ...word_bank,
+                ...distractor_words,
+            ]);
+            // Get 15 choice options from the combined bank
+            const word_choices = combined_bank.slice(0, 15);
+            // Ensure answer_key only contains valid words from word_bank
+            const answer_key = word_choices.filter((word) =>
+                word_bank.includes(word)
+            );
+
+            return {
+                type: jsPsychSurvey,
+                survey_json: {
+                    showQuestionNumbers: false,
+                    elements: [
+                        {
+                            type: 'checkbox',
+                            title: 'Which words were included in the previous list?',
+                            choices: [...word_choices],
+                            name: 'selected_words',
+                        },
+                    ],
+                    choicesOrder: 'random',
+                    completeText: 'Continue',
+                },
+                on_finish: function (data) {
+                    // Assign phase label
+                    data['phase'] = `recall_${label}`;
+                    // Retrieve selected words
+                    const selected_words =
+                        data.response?.['selected_words'] || [];
+                    // Filter correct words from word bank
+                    const correct_words = selected_words.filter((word) =>
+                        word_bank.includes(word)
+                    );
+                    // Calculate recall accuracy
+                    data['accuracy'] =
+                        answer_key.length > 0
+                            ? correct_words.length / answer_key.length
+                            : 0;
+                    console.log(data); // Debugging
+                },
+            };
         }
 
         // Define music options and shuffle for randomization
@@ -421,12 +496,15 @@
             const word_bank = get_word_bank();
             timeline.push(...create_word_trials(word_bank, track));
 
-            // Create distractor trials and add to the timeline
-            const distractor_trials = create_distractor_trials();
+            // Create math distractor trials and add to the timeline
+            const distractor_trials = create_math_distractor_trials();
             timeline.push(distractor_trials);
 
+            const odd_one_out = create_odd_one_out_distractor();
+            timeline.push(odd_one_out);
+
             // Create recall trial and add to the timeline
-            const recall_trial = create_recall_trial(track);
+            const recall_trial = create_recall_trial(word_bank, track);
             timeline.push(recall_trial);
         });
 
