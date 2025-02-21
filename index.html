@@ -350,28 +350,28 @@
             return trials;
         }
 
+        const math_problems = [
+            {
+                question: '8 × 3 = ?',
+                choices: ['21', '24', '26', '28'],
+                correct_index: 1,
+            },
+            {
+                question: '15 - 9 = ?',
+                choices: ['5', '6', '7', '8'],
+                correct_index: 1,
+            },
+            {
+                question: '25 ÷ 5 = ?',
+                choices: ['4', '5', '6', '7'],
+                correct_index: 1,
+            },
+        ];
+
         // Function to create distractor trials with math problems
         function create_distractor_trials() {
-            const math_problems = [
-                {
-                    question: '8 × 3 = ?',
-                    choices: ['21', '24', '26', '28'],
-                    correct_index: 1,
-                },
-                {
-                    question: '15 - 9 = ?',
-                    choices: ['5', '6', '7', '8'],
-                    correct_index: 1,
-                },
-                {
-                    question: '25 ÷ 5 = ?',
-                    choices: ['4', '5', '6', '7'],
-                    correct_index: 1,
-                },
-            ];
-
-            // Generate trials
             const distractor_trials = [];
+
             math_problems.forEach((problem) => {
                 distractor_trials.push({
                     type: jsPsychHtmlButtonResponse,
